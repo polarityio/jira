@@ -1,0 +1,336 @@
+{
+    "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+    "id": "11346",
+    "self": "https://polarity.atlassian.net/rest/api/2/issue/11346",
+    "key": "WEB-390",
+    "fields": {
+        "issuetype": {
+            "self": "https://polarity.atlassian.net/rest/api/2/issuetype/10001",
+            "id": "10001",
+            "description": "A user story. Created by Jira Software - do not edit or delete.",
+            "iconUrl": "https://polarity.atlassian.net/images/icons/issuetypes/story.svg",
+            "name": "Story",
+            "subtask": false
+        },
+        "customfield_10070": null,
+        "customfield_10071": null,
+        "timespent": null,
+        "customfield_10074": 1,
+        "project": {
+            "self": "https://polarity.atlassian.net/rest/api/2/project/10008",
+            "id": "10008",
+            "key": "WEB",
+            "name": "Web",
+            "projectTypeKey": "software",
+            "avatarUrls": {
+                "48x48": "https://polarity.atlassian.net/secure/projectavatar?avatarId=10324",
+                "24x24": "https://polarity.atlassian.net/secure/projectavatar?size=small&avatarId=10324",
+                "16x16": "https://polarity.atlassian.net/secure/projectavatar?size=xsmall&avatarId=10324",
+                "32x32": "https://polarity.atlassian.net/secure/projectavatar?size=medium&avatarId=10324"
+            }
+        },
+        "customfield_10075": 20,
+        "customfield_10076": null,
+        "customfield_10077": null,
+        "fixVersions": [
+            {
+                "self": "https://polarity.atlassian.net/rest/api/2/version/10093",
+                "id": "10093",
+                "description": "https://polarity.aha.io/releases/PW-R-18",
+                "name": "3.7",
+                "archived": false,
+                "released": false,
+                "releaseDate": "2019-10-01"
+            }
+        ],
+        "customfield_10078": null,
+        "aggregatetimespent": null,
+        "resolution": null,
+        "customfield_10079": null,
+        "resolutiondate": null,
+        "workratio": -1,
+        "watches": {
+            "self": "https://polarity.atlassian.net/rest/api/2/issue/WEB-390/watchers",
+            "watchCount": 2,
+            "isWatching": true
+        },
+        "lastViewed": "2019-02-07T09:41:19.619-0500",
+        "customfield_10060": null,
+        "created": "2018-09-25T12:29:21.815-0400",
+        "customfield_10061": null,
+        "customfield_10062": null,
+        "customfield_10063": "Steps to Reproduce:\r\n1. \r\n2. \r\n3. \r\n\r\nResult:\r\n\r\nExpectation:\r\n",
+        "customfield_10066": null,
+        "priority": {
+            "self": "https://polarity.atlassian.net/rest/api/2/priority/3",
+            "iconUrl": "https://polarity.atlassian.net/images/icons/priorities/medium.svg",
+            "name": "Medium",
+            "id": "3"
+        },
+        "customfield_10067": null,
+        "customfield_10068": null,
+        "labels": [
+            "amex",
+            "transunion",
+            "united-lex",
+            "wells"
+        ],
+        "timeestimate": null,
+        "aggregatetimeoriginalestimate": null,
+        "versions": [],
+        "issuelinks": [
+            {
+                "id": "10780",
+                "self": "https://polarity.atlassian.net/rest/api/2/issueLink/10780",
+                "type": {
+                    "id": "10003",
+                    "name": "Relates",
+                    "inward": "relates to",
+                    "outward": "relates to",
+                    "self": "https://polarity.atlassian.net/rest/api/2/issueLinkType/10003"
+                },
+                "outwardIssue": {
+                    "id": "11003",
+                    "key": "SVR-262",
+                    "self": "https://polarity.atlassian.net/rest/api/2/issue/11003",
+                    "fields": {
+                        "summary": "As a Polarity Admin, I need to have a \"test\" service account button for LDAP/AD user authentication",
+                        "status": {
+                            "self": "https://polarity.atlassian.net/rest/api/2/status/10008",
+                            "description": "",
+                            "iconUrl": "https://polarity.atlassian.net/images/icons/statuses/generic.png",
+                            "name": "Unscoped",
+                            "id": "10008",
+                            "statusCategory": {
+                                "self": "https://polarity.atlassian.net/rest/api/2/statuscategory/2",
+                                "id": 2,
+                                "key": "new",
+                                "colorName": "blue-gray",
+                                "name": "To Do"
+                            }
+                        },
+                        "priority": {
+                            "self": "https://polarity.atlassian.net/rest/api/2/priority/3",
+                            "iconUrl": "https://polarity.atlassian.net/images/icons/priorities/medium.svg",
+                            "name": "Medium",
+                            "id": "3"
+                        },
+                        "issuetype": {
+                            "self": "https://polarity.atlassian.net/rest/api/2/issuetype/10001",
+                            "id": "10001",
+                            "description": "A user story. Created by Jira Software - do not edit or delete.",
+                            "iconUrl": "https://polarity.atlassian.net/images/icons/issuetypes/story.svg",
+                            "name": "Story",
+                            "subtask": false
+                        }
+                    }
+                }
+            }
+        ],
+        "assignee": {
+            "self": "https://polarity.atlassian.net/rest/api/2/user?accountId=5a0c9d2d7bef0277b5cea3a9",
+            "name": "admin",
+            "key": "admin",
+            "accountId": "5a0c9d2d7bef0277b5cea3a9",
+            "emailAddress": "joem@polarity.io",
+            "avatarUrls": {
+                "48x48": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=48&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D48%26noRedirect%3Dtrue",
+                "24x24": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=24&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D24%26noRedirect%3Dtrue",
+                "16x16": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=16&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D16%26noRedirect%3Dtrue",
+                "32x32": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=32&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D32%26noRedirect%3Dtrue"
+            },
+            "displayName": "Joseph Miller",
+            "active": true,
+            "timeZone": "America/New_York"
+        },
+        "updated": "2019-02-12T07:43:53.475-0500",
+        "status": {
+            "self": "https://polarity.atlassian.net/rest/api/2/status/10008",
+            "description": "",
+            "iconUrl": "https://polarity.atlassian.net/images/icons/statuses/generic.png",
+            "name": "Unscoped",
+            "id": "10008",
+            "statusCategory": {
+                "self": "https://polarity.atlassian.net/rest/api/2/statuscategory/2",
+                "id": 2,
+                "key": "new",
+                "colorName": "blue-gray",
+                "name": "To Do"
+            }
+        },
+        "customfield_10090": null,
+        "components": [],
+        "customfield_10091": null,
+        "customfield_10092": null,
+        "customfield_10093": null,
+        "customfield_10094": null,
+        "timeoriginalestimate": null,
+        "description": null,
+        "customfield_10010": [
+            "com.atlassian.greenhopper.service.sprint.Sprint@23f65c50[id=68,rapidViewId=10,state=CLOSED,name=WEB Sprint 17,goal=,startDate=2018-11-28T19:10:17.107Z,endDate=2018-12-26T20:10:00.000Z,completeDate=2019-01-10T19:29:33.677Z,sequence=68]",
+            "com.atlassian.greenhopper.service.sprint.Sprint@51c90609[id=73,rapidViewId=10,state=CLOSED,name=WEB Sprint 18,goal=,startDate=2019-01-10T19:29:06.004Z,endDate=2019-01-30T20:29:00.000Z,completeDate=2019-01-30T18:55:45.597Z,sequence=73]",
+            "com.atlassian.greenhopper.service.sprint.Sprint@342c6329[id=58,rapidViewId=10,state=CLOSED,name=WEB Sprint 15,goal=,startDate=2018-10-03T19:25:54.175Z,endDate=2018-10-31T19:25:00.000Z,completeDate=2018-10-31T18:42:17.249Z,sequence=58]",
+            "com.atlassian.greenhopper.service.sprint.Sprint@2a489859[id=77,rapidViewId=10,state=ACTIVE,name=WEB Sprint 19,goal=,startDate=2019-01-30T18:56:50.709Z,endDate=2019-02-27T18:56:00.000Z,completeDate=<null>,sequence=77]"
+        ],
+        "customfield_10011": "1|i006ye:v",
+        "customfield_10012": "2019-01-09T11:04:09.927-0500",
+        "customfield_10013": null,
+        "timetracking": {},
+        "customfield_10059": null,
+        "security": null,
+        "customfield_10008": null,
+        "aggregatetimeestimate": null,
+        "customfield_10009": {
+            "hasEpicLinkFieldDependency": false,
+            "showField": false,
+            "nonEditableReason": {
+                "reason": "PLUGIN_LICENSE_ERROR",
+                "message": "Portfolio for Jira must be licensed for the Parent Link to be available."
+            }
+        },
+        "attachment": [
+            {
+                "self": "https://polarity.atlassian.net/rest/api/2/attachment/10653",
+                "id": "10653",
+                "filename": "LDAP-test-01.png",
+                "author": {
+                    "self": "https://polarity.atlassian.net/rest/api/2/user?accountId=557058%3Afa5c8e60-96dc-4edc-8521-aa02514cc90e",
+                    "name": "david",
+                    "key": "david",
+                    "accountId": "557058:fa5c8e60-96dc-4edc-8521-aa02514cc90e",
+                    "emailAddress": "david@polarity.io",
+                    "avatarUrls": {
+                        "48x48": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=48&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D48%26noRedirect%3Dtrue",
+                        "24x24": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=24&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D24%26noRedirect%3Dtrue",
+                        "16x16": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=16&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D16%26noRedirect%3Dtrue",
+                        "32x32": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=32&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D32%26noRedirect%3Dtrue"
+                    },
+                    "displayName": "David Roddy",
+                    "active": true,
+                    "timeZone": "America/New_York"
+                },
+                "created": "2019-01-09T11:03:55.111-0500",
+                "size": 67875,
+                "mimeType": "image/png",
+                "content": "https://polarity.atlassian.net/secure/attachment/10653/LDAP-test-01.png",
+                "thumbnail": "https://polarity.atlassian.net/secure/thumbnail/10653/LDAP-test-01.png"
+            }
+        ],
+        "summary": "As an admin, I need to have a test LDAP/AD button that sends a test query to their LDAP/AD.",
+        "creator": {
+            "self": "https://polarity.atlassian.net/rest/api/2/user?accountId=5a0c9d2d7bef0277b5cea3a9",
+            "name": "admin",
+            "key": "admin",
+            "accountId": "5a0c9d2d7bef0277b5cea3a9",
+            "emailAddress": "joem@polarity.io",
+            "avatarUrls": {
+                "48x48": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=48&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D48%26noRedirect%3Dtrue",
+                "24x24": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=24&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D24%26noRedirect%3Dtrue",
+                "16x16": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=16&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D16%26noRedirect%3Dtrue",
+                "32x32": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=32&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D32%26noRedirect%3Dtrue"
+            },
+            "displayName": "Joseph Miller",
+            "active": true,
+            "timeZone": "America/New_York"
+        },
+        "customfield_10080": [],
+        "customfield_10081": null,
+        "customfield_10082": null,
+        "subtasks": [],
+        "customfield_10083": null,
+        "customfield_10084": null,
+        "customfield_10085": null,
+        "customfield_10086": null,
+        "customfield_10087": null,
+        "reporter": {
+            "self": "https://polarity.atlassian.net/rest/api/2/user?accountId=5a0c9d2d7bef0277b5cea3a9",
+            "name": "admin",
+            "key": "admin",
+            "accountId": "5a0c9d2d7bef0277b5cea3a9",
+            "emailAddress": "joem@polarity.io",
+            "avatarUrls": {
+                "48x48": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=48&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D48%26noRedirect%3Dtrue",
+                "24x24": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=24&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D24%26noRedirect%3Dtrue",
+                "16x16": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=16&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D16%26noRedirect%3Dtrue",
+                "32x32": "https://avatar-cdn.atlassian.com/b3a396993b08dab13b482950774d2787?s=32&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2Fb3a396993b08dab13b482950774d2787%3Fd%3Dmm%26s%3D32%26noRedirect%3Dtrue"
+            },
+            "displayName": "Joseph Miller",
+            "active": true,
+            "timeZone": "America/New_York"
+        },
+        "customfield_10000": "{}",
+        "customfield_10088": null,
+        "aggregateprogress": {
+            "progress": 0,
+            "total": 0
+        },
+        "customfield_10001": null,
+        "customfield_10089": null,
+        "customfield_10047": 3,
+        "customfield_10004": null,
+        "environment": null,
+        "duedate": null,
+        "progress": {
+            "progress": 0,
+            "total": 0
+        },
+        "votes": {
+            "self": "https://polarity.atlassian.net/rest/api/2/issue/WEB-390/votes",
+            "votes": 0,
+            "hasVoted": false
+        },
+        "comment": {
+            "comments": [
+                {
+                    "self": "https://polarity.atlassian.net/rest/api/2/issue/11346/comment/12338",
+                    "id": "12338",
+                    "author": {
+                        "self": "https://polarity.atlassian.net/rest/api/2/user?accountId=557058%3Afa5c8e60-96dc-4edc-8521-aa02514cc90e",
+                        "name": "david",
+                        "key": "david",
+                        "accountId": "557058:fa5c8e60-96dc-4edc-8521-aa02514cc90e",
+                        "emailAddress": "david@polarity.io",
+                        "avatarUrls": {
+                            "48x48": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=48&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D48%26noRedirect%3Dtrue",
+                            "24x24": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=24&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D24%26noRedirect%3Dtrue",
+                            "16x16": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=16&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D16%26noRedirect%3Dtrue",
+                            "32x32": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=32&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D32%26noRedirect%3Dtrue"
+                        },
+                        "displayName": "David Roddy",
+                        "active": true,
+                        "timeZone": "America/New_York"
+                    },
+                    "body": " !LDAP-test-01.png|thumbnail!  - Concept for LDAP flow meeting. ",
+                    "updateAuthor": {
+                        "self": "https://polarity.atlassian.net/rest/api/2/user?accountId=557058%3Afa5c8e60-96dc-4edc-8521-aa02514cc90e",
+                        "name": "david",
+                        "key": "david",
+                        "accountId": "557058:fa5c8e60-96dc-4edc-8521-aa02514cc90e",
+                        "emailAddress": "david@polarity.io",
+                        "avatarUrls": {
+                            "48x48": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=48&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D48%26noRedirect%3Dtrue",
+                            "24x24": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=24&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D24%26noRedirect%3Dtrue",
+                            "16x16": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=16&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D16%26noRedirect%3Dtrue",
+                            "32x32": "https://avatar-cdn.atlassian.com/26cfdcc3f8dc041e887c201a5fafc2d8?s=32&d=https%3A%2F%2Fsecure.gravatar.com%2Favatar%2F26cfdcc3f8dc041e887c201a5fafc2d8%3Fd%3Dmm%26s%3D32%26noRedirect%3Dtrue"
+                        },
+                        "displayName": "David Roddy",
+                        "active": true,
+                        "timeZone": "America/New_York"
+                    },
+                    "created": "2019-01-09T11:04:09.927-0500",
+                    "updated": "2019-01-09T11:04:09.927-0500",
+                    "jsdPublic": true
+                }
+            ],
+            "maxResults": 1,
+            "total": 1,
+            "startAt": 0
+        },
+        "worklog": {
+            "startAt": 0,
+            "maxResults": 20,
+            "total": 0,
+            "worklogs": []
+        }
+    }
+}
