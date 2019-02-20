@@ -24,7 +24,7 @@ module.exports = {
         ],
   entityTypes: ['domain', 'email' ],
   logging: {
-    level: 'trace',
+    level: 'info',
     fileName: 'integration.log',
     directoryPath: 'logs'
   },

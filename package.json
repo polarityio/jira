@@ -1,8 +1,8 @@
 {
   "main": "./integration.js",
   "name": "Jira",
-  "description": "Jira Search",
-  "version": "1.0.0",
+  "description": "Jira Issue Search",
+  "version": "3.0.0",
   "private": true,
   "dependencies": {
     "request": ">=2.76.0",
