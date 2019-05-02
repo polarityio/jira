@@ -18,6 +18,7 @@ dependency-reduced-pom.xml
 
 # Ignore Excel Files
 *.xlsx
+*testdata.json
 
 # Ignore local log files
 *.log
