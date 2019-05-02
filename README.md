@@ -4,7 +4,7 @@ The Polarity Jira integration allows Polarity to search Jira to return any Issue
 
 View the integration in action:
 
-![jira](https://user-images.githubusercontent.com/22529325/53031660-482af380-343b-11e9-8e1c-781db41fc8c4.gif)
+![jira](https://user-images.githubusercontent.com/22529325/57065777-7c6f2b80-6c98-11e9-9f0a-ee09dda09a04.gif)
 
 
 ## Jira Integration Options
