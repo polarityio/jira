@@ -17,7 +17,7 @@ function doLookup(entities, options, cb) {
   }, "Checking to see if data is moving");
 
   async.each(entities, function(entityObj, next) {
-    if(entityObj.isDomain  || entityObj.isEmail ) {
+    if(entityObj.isDomain  || entityObj.isEmail || entityObj.isIPv4 || entityObj.isIPv6) {
       _lookupEntity(entityObj, options, function(err, issue) {
       if (err) {
         next(err);

@@ -22,7 +22,7 @@ module.exports = {
             		regex: /[A-Z]{1,10}-\d{1,10}/
         	}
         ],
-  entityTypes: ['domain', 'email' ],
+  entityTypes: ['domain', 'email', 'IPv4', 'IPv6'],
   logging: {
     level: 'info',
     fileName: 'integration.log',
@@ -221,7 +221,7 @@ module.exports = {
        * @property type
        * @type String
        */
-      "type": "text",
+      "type": "password",
       /**
        * If `true`, non-admin users can edit the value of this option and the option will be stored on a
        * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have

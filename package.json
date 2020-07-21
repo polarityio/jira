@@ -2,11 +2,11 @@
   "main": "./integration.js",
   "name": "Jira",
   "description": "Jira Issue Search",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "private": true,
   "dependencies": {
-    "request": ">=2.76.0",
-    "lodash": ">=4.16.6",
-    "async": ">=2.1.2"
+    "request": "^2.88.2",
+    "lodash": "^4.17.19",
+    "async": "^3.2.0"
   }
 }
