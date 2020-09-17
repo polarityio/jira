@@ -16,37 +16,37 @@ function doLookup(entities, options, cb) {
     entity: entities
   }, "Checking to see if data is moving");
 
-  async.each(entities, function(entityObj, next) {
-    if(entityObj.isDomain  || entityObj.isEmail || entityObj.isIPv4 || entityObj.isIPv6) {
-      _lookupEntity(entityObj, options, function(err, issue) {
-      if (err) {
-        next(err);
-      } else {
-        lookupIssues.push(issue);
+  async.each(entities, function (entityObj, next) {
+    if (entityObj.isDomain || entityObj.isEmail || entityObj.isIPv4 || entityObj.isIPv6) {
+      _lookupEntity(entityObj, options, function (err, issue) {
+        if (err) {
+          next(err);
+        } else {
+          lookupIssues.push(issue);
 
-        log.trace({
-          issue: issue
-        }, "Checking Issues");
-        next(null);
-      }
-    });
-  } else if(entityObj.type === 'custom') {
-    _lookupEntityIssue(entityObj, options, function(err, issue) {
-    if (err) {
-      next(err);
+          log.trace({
+            issue: issue
+          }, "Checking Issues");
+          next(null);
+        }
+      });
+    } else if (entityObj.type === 'custom') {
+      _lookupEntityIssue(entityObj, options, function (err, issue) {
+        if (err) {
+          next(err);
+        } else {
+          lookupIssues.push(issue);
+          log.trace({
+            issue: issue
+          }, "Checking Issues");
+          next(null);
+        }
+      });
     } else {
-      lookupIssues.push(issue);
-      log.trace({
-        issue: issue
-      }, "Checking Issues");
+      lookupIssues.push({ entity: entityObj, data: null }); //Cache the missed results
       next(null);
     }
-  });
-} else {
-        lookupIssues.push({entity: entityObj, data: null}); //Cache the missed results
-      next(null);
-            }
-  },function(err) {
+  }, function (err) {
     cb(err, lookupIssues);
   });
 }
@@ -67,7 +67,7 @@ function _lookupEntityIssue(entityObj, options, cb) {
     },
     json: true
 
-  }, function(err, response, body) {
+  }, function (err, response, body) {
     // check for a request error
     if (err) {
       cb({
@@ -103,9 +103,9 @@ function _lookupEntityIssue(entityObj, options, cb) {
       return;
     }
 
-    log.debug({body: body}, "Checking Null issues for body");
+    log.debug({ body: body }, "Checking Null issues for body");
 
-    if (_.isNull(body) || _.isEmpty(body.id)){
+    if (_.isNull(body) || _.isEmpty(body.id)) {
       cb(null, {
         entity: entityObj,
         data: null // setting data to null indicates to the server that this entity lookup was a "miss"
@@ -135,7 +135,7 @@ function _lookupEntity(entityObj, options, cb) {
   //}, "Checking to see if data is moving");
 
   let uri = options.baseUrl + "/rest/api/2/search?jql=text~" + JSON.stringify(entityObj.value);
-  let url = options.baseUrl;
+  
   request({
     uri: uri,
     method: 'GET',
@@ -145,7 +145,7 @@ function _lookupEntity(entityObj, options, cb) {
     },
     json: true
 
-  }, function(err, response, body) {
+  }, function (err, response, body) {
     // check for a request error
     if (err) {
       cb({
@@ -185,7 +185,7 @@ function _lookupEntity(entityObj, options, cb) {
     }
 
 
-    if (_.isNull(body) || _.isEmpty(body.issues)){
+    if (_.isNull(body) || _.isEmpty(body.issues)) {
       cb(null, {
         entity: entityObj,
         data: null // setting data to null indicates to the server that this entity lookup was a "miss"

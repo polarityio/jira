@@ -16,12 +16,12 @@ module.exports = {
    */
   acronym: "JIRA",
 
-  customTypes:[
-        	{
-            		key: 'jira',
-            		regex: /[A-Z]{1,10}-\d{1,10}/
-        	}
-        ],
+  customTypes: [
+    {
+      key: 'jira',
+      regex: /[A-Z]{1,10}-\d{1,10}/
+    }
+  ],
   entityTypes: ['domain', 'email', 'IPv4', 'IPv6'],
   logging: {
     level: 'info',
@@ -80,174 +80,174 @@ module.exports = {
    * @optional
    */
   "options": [{
-      "key": "baseUrl",
-      /**
-       * Human Readable name for the option which will be displayed in the Polarity user interface
-       *
-       * @property name
-       * @type String
-       */
-      "name": "Jira Base Url",
-      /**
-       * A short description for what the option does.  This description is displayed in the user interface
-       *
-       * @property description
-       * @type String
-       */
-      "description": "Your Jira Base Url",
-      /**
-       * The default value for the option.  Note this value can be either a String or Boolean depending on
-       * the @type specified by the `type` property.
-       *
-       * @property default
-       * @type String|Boolean
-       */
-      "default": "",
-      /**
-       * The type for this option.  Can be either "string", "boolean", or "password"
-       *
-       * @property type
-       * @type String
-       */
-      "type": "text",
-      /**
-       * If `true`, non-admin users can edit the value of this option and the option will be stored on a
-       * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have
-       * an effect, the property `admin-only` must be set to false.
-       *
-       * @property user-can-edit
-       * @type Boolean
-       */
-      "userCanEdit": true,
-      /**
-       * If set to true, the setting can only be viewed by admins.  For all other users the setting will not appear.
-       * Note that if `admin-only` is set to true the value of `user-can-edit` is not applicable.
-       *
-       * @property admin-only
-       * @type Boolean
-       */
-      "adminOnly": false
-    },
-    {
-      /**
-       * A Unique name for the option.  Should be camelcased (lowercase first letter, uppercase letters for
-       * subsequent words).
-       *
-       * @property key
-       * @type String             *
-       */
-      "key": "userName",
-      /**
-       * Human Readable name for the option which will be displayed in the Polarity user interface
-       *
-       * @property name
-       * @type String
-       */
-      "name": "Jira Username",
-      /**
-       * A short description for what the option does.  This description is displayed in the user interface
-       *
-       * @property description
-       * @type String
-       */
-      "description": "Your Jira Username",
-      /**
-       * The default value for the option.  Note this value can be either a String or Boolean depending on
-       * the @type specified by the `type` property.
-       *
-       * @property default
-       * @type String|Boolean
-       */
-      "default": "",
-      /**
-       * The type for this option.  Can be either "string", "boolean", or "password"
-       *
-       * @property type
-       * @type String
-       */
-      "type": "text",
-      /**
-       * If `true`, non-admin users can edit the value of this option and the option will be stored on a
-       * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have
-       * an effect, the property `admin-only` must be set to false.
-       *
-       * @property user-can-edit
-       * @type Boolean
-       */
-      "userCanEdit": true,
-      /**
-       * If set to true, the setting can only be viewed by admins.  For all other users the setting will not appear.
-       * Note that if `admin-only` is set to true the value of `user-can-edit` is not applicable.
-       *
-       * @property admin-only
-       * @type Boolean
-       */
-      "adminOnly": false
-      /**
-       * A Unique name for the option.  Should be camelcased (lowercase first letter, uppercase letters for
-       * subsequent words).
-       *
-       * @property key
-       * @type String             *
-       */
-    },
-    {
-      "key": "apiKey",
-      /**
-       * Human Readable name for the option which will be displayed in the Polarity user interface
-       *
-       * @property name
-       * @type String
-       */
-      "name": "Jira API Key",
-      /**
-       * A short description for what the option does.  This description is displayed in the user interface
-       *
-       * @property description
-       * @type String
-       */
-      "description": "Your Jira API Key",
-      /**
-       * The default value for the option.  Note this value can be either a String or Boolean depending on
-       * the @type specified by the `type` property.
-       *
-       * @property default
-       * @type String|Boolean
-       */
-      "default": "",
-      /**
-       * The type for this option.  Can be either "string", "boolean", or "password"
-       *
-       * @property type
-       * @type String
-       */
-      "type": "password",
-      /**
-       * If `true`, non-admin users can edit the value of this option and the option will be stored on a
-       * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have
-       * an effect, the property `admin-only` must be set to false.
-       *
-       * @property user-can-edit
-       * @type Boolean
-       */
-      "userCanEdit": true,
-      /**
-       * If set to true, the setting can only be viewed by admins.  For all other users the setting will not appear.
-       * Note that if `admin-only` is set to true the value of `user-can-edit` is not applicable.
-       *
-       * @property admin-only
-       * @type Boolean
-       */
-      "adminOnly": false
-    },
-    {
-      "key": "searchIssue",
-      "name": "Jira Issue Search",
-      "description": "If checked, the integration will search keywords/phrases in Jira issues",
-      "default": true,
-      "type": "boolean",
-      "userCanEdit": true,
-      "adminOnly": false
-    },
+    "key": "baseUrl",
+    /**
+     * Human Readable name for the option which will be displayed in the Polarity user interface
+     *
+     * @property name
+     * @type String
+     */
+    "name": "Jira Base URL",
+    /**
+     * A short description for what the option does.  This description is displayed in the user interface
+     *
+     * @property description
+     * @type String
+     */
+    "description": "URL used to access your instance of Jira.",
+    /**
+     * The default value for the option.  Note this value can be either a String or Boolean depending on
+     * the @type specified by the `type` property.
+     *
+     * @property default
+     * @type String|Boolean
+     */
+    "default": "",
+    /**
+     * The type for this option.  Can be either "string", "boolean", or "password"
+     *
+     * @property type
+     * @type String
+     */
+    "type": "text",
+    /**
+     * If `true`, non-admin users can edit the value of this option and the option will be stored on a
+     * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have
+     * an effect, the property `admin-only` must be set to false.
+     *
+     * @property user-can-edit
+     * @type Boolean
+     */
+    "userCanEdit": true,
+    /**
+     * If set to true, the setting can only be viewed by admins.  For all other users the setting will not appear.
+     * Note that if `admin-only` is set to true the value of `user-can-edit` is not applicable.
+     *
+     * @property admin-only
+     * @type Boolean
+     */
+    "adminOnly": false
+  },
+  {
+    /**
+     * A Unique name for the option.  Should be camelcased (lowercase first letter, uppercase letters for
+     * subsequent words).
+     *
+     * @property key
+     * @type String             *
+     */
+    "key": "userName",
+    /**
+     * Human Readable name for the option which will be displayed in the Polarity user interface
+     *
+     * @property name
+     * @type String
+     */
+    "name": "Jira Username",
+    /**
+     * A short description for what the option does.  This description is displayed in the user interface
+     *
+     * @property description
+     * @type String
+     */
+    "description": "Username used for individual to access Jira.",
+    /**
+     * The default value for the option.  Note this value can be either a String or Boolean depending on
+     * the @type specified by the `type` property.
+     *
+     * @property default
+     * @type String|Boolean
+     */
+    "default": "",
+    /**
+     * The type for this option.  Can be either "string", "boolean", or "password"
+     *
+     * @property type
+     * @type String
+     */
+    "type": "text",
+    /**
+     * If `true`, non-admin users can edit the value of this option and the option will be stored on a
+     * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have
+     * an effect, the property `admin-only` must be set to false.
+     *
+     * @property user-can-edit
+     * @type Boolean
+     */
+    "userCanEdit": true,
+    /**
+     * If set to true, the setting can only be viewed by admins.  For all other users the setting will not appear.
+     * Note that if `admin-only` is set to true the value of `user-can-edit` is not applicable.
+     *
+     * @property admin-only
+     * @type Boolean
+     */
+    "adminOnly": false
+    /**
+     * A Unique name for the option.  Should be camelcased (lowercase first letter, uppercase letters for
+     * subsequent words).
+     *
+     * @property key
+     * @type String             *
+     */
+  },
+  {
+    "key": "apiKey",
+    /**
+     * Human Readable name for the option which will be displayed in the Polarity user interface
+     *
+     * @property name
+     * @type String
+     */
+    "name": "API Token or Password",
+    /**
+     * A short description for what the option does.  This description is displayed in the user interface
+     *
+     * @property description
+     * @type String
+     */
+    "description": "Jira API token (For Jira Cloud) or Jira Password (For Jira Server).",
+    /**
+     * The default value for the option.  Note this value can be either a String or Boolean depending on
+     * the @type specified by the `type` property.
+     *
+     * @property default
+     * @type String|Boolean
+     */
+    "default": "",
+    /**
+     * The type for this option.  Can be either "string", "boolean", or "password"
+     *
+     * @property type
+     * @type String
+     */
+    "type": "password",
+    /**
+     * If `true`, non-admin users can edit the value of this option and the option will be stored on a
+     * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have
+     * an effect, the property `admin-only` must be set to false.
+     *
+     * @property user-can-edit
+     * @type Boolean
+     */
+    "userCanEdit": true,
+    /**
+     * If set to true, the setting can only be viewed by admins.  For all other users the setting will not appear.
+     * Note that if `admin-only` is set to true the value of `user-can-edit` is not applicable.
+     *
+     * @property admin-only
+     * @type Boolean
+     */
+    "adminOnly": false
+  },
+  {
+    "key": "searchIssue",
+    "name": "Jira Issue Search",
+    "description": "If checked, the integration will search keywords/phrases in Jira issues",
+    "default": true,
+    "type": "boolean",
+    "userCanEdit": true,
+    "adminOnly": false
+  },
   ]
 };
