@@ -2,11 +2,33 @@
 let request = require('request');
 let _ = require('lodash');
 let async = require('async');
+let config = require('./config/config');
 let util = require('util');
 let log = null
+let requestWithDefaults;
 
 function startup(logger) {
   log = logger;
+  let defaults = {};
+  if (typeof config.request.cert === 'string' && config.request.cert.length > 0) {
+    defaults.cert = fs.readFileSync(config.request.cert);
+  }
+  if (typeof config.request.key === 'string' && config.request.key.length > 0) {
+    defaults.key = fs.readFileSync(config.request.key);
+  }
+  if (typeof config.request.passphrase === 'string' && config.request.passphrase.length > 0) {
+    defaults.passphrase = config.request.passphrase;
+  }
+  if (typeof config.request.ca === 'string' && config.request.ca.length > 0) {
+    defaults.ca = fs.readFileSync(config.request.ca);
+  }
+  if (typeof config.request.proxy === 'string' && config.request.proxy.length > 0) {
+    defaults.proxy = config.request.proxy;
+  }
+  if (typeof config.request.rejectUnauthorized === 'boolean') {
+    defaults.rejectUnauthorized = config.request.rejectUnauthorized;
+  }
+  requestWithDefaults = request.defaults(defaults);
 }
 
 function doLookup(entities, options, cb) {
@@ -58,7 +80,7 @@ function _lookupEntityIssue(entityObj, options, cb) {
 
   let uri = options.baseUrl + "/rest/api/2/issue/" + entityObj.value;
   let url = options.baseUrl;
-  request({
+  requestWithDefaults({
     uri: uri,
     method: 'GET',
     auth: {
@@ -136,7 +158,7 @@ function _lookupEntity(entityObj, options, cb) {
 
   let uri = options.baseUrl + "/rest/api/2/search?jql=text~" + JSON.stringify(entityObj.value);
   
-  request({
+  requestWithDefaults({
     uri: uri,
     method: 'GET',
     auth: {

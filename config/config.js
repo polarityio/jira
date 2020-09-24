@@ -5,6 +5,7 @@ module.exports = {
    * @required
    */
   name: "Jira",
+  
   /**
    * The acronym that appears in the notification window when information from this integration
    * is displayed.  Note that the acronym is included as part of each "tag" in the summary information
@@ -15,7 +16,14 @@ module.exports = {
    * @required
    */
   acronym: "JIRA",
-
+  
+  /**
+   * Description for this integration which is displayed in the Polarity integrations user interface
+   *
+   * @type String
+   * @optional
+   */
+  description: "Lookup Jira issues by issue or email",
   customTypes: [
     {
       key: 'jira',
@@ -24,19 +32,35 @@ module.exports = {
   ],
   entityTypes: ['domain', 'email', 'IPv4', 'IPv6'],
   logging: {
-    level: 'info',
+    level: 'info', //trace, debug, info, warn, error, fatal
     fileName: 'integration.log',
     directoryPath: 'logs'
   },
-  //trace, debug, info, warn, error, fatal
-  /**
-   * Description for this integration which is displayed in the Polarity integrations user interface
-   *
-   * @type String
-   * @optional
-   */
-  description: "Lookup Jira issues by issue or email",
+  request: {
+    // Provide the path to your certFile. Leave an empty string to ignore this option.
+    // Relative paths are relative to the integration's root directory
+    cert: '',
+    // Provide the path to your private key. Leave an empty string to ignore this option.
+    // Relative paths are relative to the integration's root directory
+    key: '',
+    // Provide the key passphrase if required.  Leave an empty string to ignore this option.
+    // Relative paths are relative to the integration's root directory
+    passphrase: '',
+    // Provide the Certificate Authority. Leave an empty string to ignore this option.
+    // Relative paths are relative to the integration's root directory
+    ca: '',
+    // An HTTP proxy to be used. Supports proxy Auth with Basic Auth, identical to support for
+    // the url parameter (by embedding the auth info in the uri)
+    proxy: '',
+    /**
+     * If set to false, the integration will ignore SSL errors.  This will allow the integration to connect
+     * to the MISP servers without valid SSL certificates.  Please note that we do NOT recommending setting this
+     * to false in a production environment.
+     */
+    rejectUnauthorized: true
+  },
 
+  
   /**
    * An array of style files (css or less) that will be included for your integration. Any styles specified in
    * the below files can be used in your custom template.
