@@ -6,229 +6,223 @@
 {{/if}}
 
 {{#if details.fields}}
-<h1 class="p-title">
-            {{fa-icon "ticket"}} Ticket Summary
-</h1>
-
-{{#if details.fields.issuetype.name}}
-<div>
-    <span class="p-key">Issue Type:</span>
-    <span class="p-value">{{details.fields.issuetype.name}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.status.name}}
-<div>
-    <span class="p-key">Issue Status:</span>
-    <span class="p-value">{{details.fields.status.name}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.priority.name}}
-<div>
-    <span class="p-key">Issue Priority:</span>
-    <span class="p-value">{{details.fields.priority.name}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.summary}}
-<div>
-    <span class="p-key">Issue Summary:</span>
-    <span class="p-value">{{details.fields.summary}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.assignee.displayName}}
-<div>
-    <span class="p-key">Current Issue Assignee:</span>
-    <span class="p-value">{{details.fields.assignee.displayName}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.updated}}
-<div>
-    <span class="p-key">Issue Last Updated:</span>
-    <span class="p-value">{{details.fields.updated}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.resolution}}
-<div>
-    <span class="p-key">Issue Resolution:</span>
-    <span class="p-value">{{details.fields.resolution}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.resolutiondate}}
-<div>
-    <span class="p-key">Issue Resolution Date:</span>
-    <span class="p-value">{{details.fields.resolutiondate}}</span>
-</div>
-{{/if}}
-
-
-{{#if details.fields.fixVersions}}
-<h1 class="p-title">
-            {{fa-icon "calendar"}} Roadmap Version
-</h1>
-
-{{#each details.fields.fixVersions as |version|}}
-{{#if version.name}}
-<div>
-    <span class="p-key">Version Name:</span>
-    <span class="p-value">{{version.name}}</span>
-</div>
-{{/if}}
-{{#if version.releaseDate}}
-<div>
-    <span class="p-key">Version Release Date:</span>
-    <span class="p-value">{{version.releaseDate}}</span>
-</div>
-{{/if}}
-{{#if version.description}}
-<div>
-    <span class="p-key">Version Description:</span>
-    <span class="p-value">{{version.description}}</span>
-</div>
-{{/if}}
-{{/each}}
-{{/if}}
-
-{{#if details.fields.comment}}
-{{#each details.fields.comment.comments as |comment|}}
-  <h1 class="p-title">
-      {{fa-icon "comments" }}
-        Comments
-        <span class="p-action view-more" {{action "toggleScanner"}}>
-    {{#if isShowingDiv}}
-        (Hide Comments<i class="fa fa-fw fa-angle-up"></i>)
-    {{else}}
-        (View Comment Details<i class="fa fa-fw fa-angle-down"></i>)
-    {{/if}}
-      </span>
+    <h1 class="p-title">
+        {{fa-icon "ticket"}} Ticket Summary
     </h1>
-    {{#if isShowingDiv}}
-    <div>
-        <span class="p-key">Commentor:</span>
-        <span class="p-value">{{comment.author.displayName}}</span>
-    </div>
-    <div>
-      <pre>{{comment.body}}</pre>
-    </div>
+
+    {{#if details.fields.issuetype.name}}
+        <div>
+            <span class="p-key">Issue Type:</span>
+            <span class="p-value">{{details.fields.issuetype.name}}</span>
+        </div>
     {{/if}}
-{{/each}}
+
+    {{#if details.fields.status.name}}
+        <div>
+            <span class="p-key">Issue Status:</span>
+            <span class="p-value">{{details.fields.status.name}}</span>
+        </div>
+    {{/if}}
+
+    {{#if details.fields.priority.name}}
+        <div>
+            <span class="p-key">Issue Priority:</span>
+            <span class="p-value">{{details.fields.priority.name}}</span>
+        </div>
+    {{/if}}
+
+    {{#if details.fields.summary}}
+        <div>
+            <span class="p-key">Issue Summary:</span>
+            <span class="p-value">{{details.fields.summary}}</span>
+        </div>
+    {{/if}}
+
+    {{#if details.fields.assignee.displayName}}
+        <div>
+            <span class="p-key">Current Issue Assignee:</span>
+            <span class="p-value">{{details.fields.assignee.displayName}}</span>
+        </div>
+    {{/if}}
+
+    {{#if details.fields.updated}}
+        <div>
+            <span class="p-key">Issue Last Updated:</span>
+            <span class="p-value">{{details.fields.updated}}</span>
+        </div>
+    {{/if}}
+
+    {{#if details.fields.resolution}}
+        <div>
+            <span class="p-key">Issue Resolution:</span>
+            <span class="p-value">{{details.fields.resolution}}</span>
+        </div>
+    {{/if}}
+
+    {{#if details.fields.resolutiondate}}
+        <div>
+            <span class="p-key">Issue Resolution Date:</span>
+            <span class="p-value">{{details.fields.resolutiondate}}</span>
+        </div>
+    {{/if}}
+
+    {{#if details.fields.description}}
+        <div>
+            <span class="p-key">Description:</span>
+            <span class="p-value">{{details.fields.description}}</span>
+        </div>
+    {{/if}}
+
+
+    {{#if details.fields.fixVersions}}
+        <h1 class="p-title">
+            {{fa-icon "calendar"}} Roadmap Version
+        </h1>
+
+        {{#each details.fields.fixVersions as |version|}}
+            {{#if version.name}}
+                <div>
+                    <span class="p-key">Version Name:</span>
+                    <span class="p-value">{{version.name}}</span>
+                </div>
+            {{/if}}
+            {{#if version.releaseDate}}
+                <div>
+                    <span class="p-key">Version Release Date:</span>
+                    <span class="p-value">{{version.releaseDate}}</span>
+                </div>
+            {{/if}}
+            {{#if version.description}}
+                <div>
+                    <span class="p-key">Version Description:</span>
+                    <span class="p-value">{{version.description}}</span>
+                </div>
+            {{/if}}
+        {{/each}}
+    {{/if}}
+
+    {{#if details.fields.comment}}
+        {{#each details.fields.comment.comments as |comment|}}
+            <h1 class="p-title">
+                {{fa-icon "comments" }} Comments
+                <span class="p-action view-more" {{action "toggleScanner"}}>
+                    {{#if isShowingDiv}}
+                        (Hide Comments<i class="fa fa-fw fa-angle-up"></i>)
+                    {{else}}
+                        (View Comment Details<i class="fa fa-fw fa-angle-down"></i>)
+                    {{/if}}
+                </span>
+            </h1>
+            {{#if isShowingDiv}}
+                <div>
+                    <span class="p-key">Commentor:</span>
+                    <span class="p-value">{{comment.author.displayName}}</span>
+                </div>
+                <div>
+                    <pre>{{comment.body}}</pre>
+                </div>
+            {{/if}}
+        {{/each}}
+    {{/if}}
+
+    {{#if details.fields.labels}}
+        <h1 class="p-title">
+                    {{fa-icon "tags"}} Issue Labels
+        </h1>
+
+        <div class="tags">
+            {{#each details.fields.labels as |label|}}
+                <span class="pulse-tag">{{label}}</span>
+            {{/each}}
+        </div>
+    {{/if}}
+
+    <h1 class="p-title">
+        {{fa-icon "info-circle"}} Issues Created Information
+    </h1>
+
+    {{#if details.fields.creator.name}}
+        <div>
+            <span class="p-key">Issue Creator:</span>
+            <span class="p-value">{{details.fields.creator.name}}</span>
+        </div>
+    {{/if}}
+
+    {{#if details.fields.creator.emailAddress}}
+        <div>
+            <span class="p-key">Issue Creator Email:</span>
+            <span class="p-value">{{details.fields.creator.emailAddress}}</span>
+        </div>
+    {{/if}}
+
+    {{#if details.fields.reporter.name}}
+        <div>
+            <span class="p-key">Issue Reporter:</span>
+            <span class="p-value">{{details.fields.reporter.name}}</span>
+        </div>
+    {{/if}}
+
+    <h1 class="p-title">
+        {{fa-icon "project-diagram"}} Jira Project Information
+    </h1>
+
+    {{#if details.fields.project.projectTypeKey}}
+        <div>
+            <span class="p-key">Project Type:</span>
+            <span class="p-value">{{details.fields.project.projectTypeKey}}</span>
+        </div>
+    {{/if}}
+
 {{/if}}
-
-{{#if details.fields.labels}}
-<h1 class="p-title">
-            {{fa-icon "tags"}} Issue Labels
-</h1>
-
-<div class="tags">
-  {{#each details.fields.labels as |label|}}
-    <span class="pulse-tag">{{label}}</span>
-  {{/each}}
-</div>
-{{/if}}
-
-<h1 class="p-title">
-            {{fa-icon "info-circle"}} Issues Created Information
-</h1>
-
-{{#if details.fields.creator}}
-<div>
-    <span class="p-key">Issue Creator:</span>
-    <span class="p-value">{{details.fields.creator.name}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.creator.emailAddress}}
-<div>
-    <span class="p-key">Issue Creator Email:</span>
-    <span class="p-value">{{details.fields.creator.emailAddress}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.reporter.name}}
-<div>
-    <span class="p-key">Issue Reporter:</span>
-    <span class="p-value">{{details.fields.reporter.name}}</span>
-</div>
-{{/if}}
-
-
-<h1 class="p-title">
-            {{fa-icon "project-diagram"}} Jira Project Information
-</h1>
-
-{{#if details.fields.project.name}}
-<div>
-    <span class="p-key">Project Name:</span>
-    <span class="p-value">{{details.fields.project.name}}</span>
-</div>
-{{/if}}
-
-{{#if details.fields.project.projectTypeKey}}
-<div>
-    <span class="p-key">Project Type:</span>
-    <span class="p-value">{{details.fields.project.projectTypeKey}}</span>
-</div>
-{{/if}}
-
-{{/if}}
-
 
 
 {{#if details.issues}}
-{{#each details.issues as |issue|}}
-<h1 class="p-title">
-    {{fa-icon "ticket"}}<a href="{{block.userOptions.baseUrl}}/browse/{{issue.key}}" target="_blank">{{issue.key}}</a>
-</h1>
-<div>
-    <span class="p-key">Project Name:</span>
-    <span class="p-value"><a href="{{block.userOptions.baseUrl}}/browse/{{issue.fields.project.name}}" target="_blank">{{issue.fields.project.name}}</a></span>
-</div>
-{{#if issue.fields.status.name}}
-<div>
-    <span class="p-key">Current Status:</span>
-    <span class="p-value">{{issue.fields.status.name}}</span>
-</div>
-{{/if}}
-{{#if issue.fields.summary}}
-<div>
-    <span class="p-key">Summary:</span>
-    <span class="p-value">{{issue.fields.summary}}</span>
-</div>
-{{/if}}
-{{#if issue.fields.priority.name}}
-<div>
-    <span class="p-key">Priority:</span>
-    <span class="p-value">{{issue.fields.priority.name}}</span>
-</div>
-{{/if}}
-{{#if issue.fields.creator.accountId}}
-<div>
-    <span class="p-key">Creator Name:</span>
-    <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.creator.accountId}}" target="_blank">{{issue.fields.creator.name}}</a></span>
-</div>
-{{/if}}
-{{#if issue.fields.create}}
-<div>
-    <span class="p-key">Created:</span>
-    <span class="p-value">{{issue.fields.created}}</span>
-</div>
-{{/if}}
-{{#if issue.fields.updated}}
-<div>
-    <span class="p-key">Updated:</span>
-    <span class="p-value">{{issue.fields.updated}}</span>
-</div>
-{{/if}}
-{{#if issue.fields.description}}
-<div>
-    <span class="p-key">Description:</span>
-    <span class="p-value">{{issue.fields.description}}</span>
-</div>
-{{/if}}
-{{/each}}
+    {{#each details.issues as |issue|}}
+        <h1 class="p-title">
+            {{fa-icon "ticket"}}<a href="{{block.userOptions.baseUrl}}/browse/{{issue.key}}" target="_blank">{{issue.key}}</a>
+        </h1>
+
+        {{#if issue.fields.status.name}}
+            <div>
+                <span class="p-key">Current Status:</span>
+                <span class="p-value">{{issue.fields.status.name}}</span>
+            </div>
+        {{/if}}
+        {{#if issue.fields.summary}}
+            <div>
+                <span class="p-key">Summary:</span>
+                <span class="p-value">{{issue.fields.summary}}</span>
+            </div>
+        {{/if}}
+        {{#if issue.fields.priority.name}}
+            <div>
+                <span class="p-key">Priority:</span>
+                <span class="p-value">{{issue.fields.priority.name}}</span>
+            </div>
+        {{/if}}
+        {{#if issue.fields.creator.accountId}}
+            <div>
+                <span class="p-key">Creator Name:</span>
+                <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.creator.accountId}}" target="_blank">{{issue.fields.creator.name}}</a></span>
+            </div>
+        {{/if}}
+        {{#if issue.fields.create}}
+            <div>
+                <span class="p-key">Created:</span>
+                <span class="p-value">{{issue.fields.created}}</span>
+            </div>
+        {{/if}}
+        {{#if issue.fields.updated}}
+            <div>
+                <span class="p-key">Updated:</span>
+                <span class="p-value">{{issue.fields.updated}}</span>
+            </div>
+        {{/if}}
+        {{#if issue.fields.description}}
+            <div>
+                <span class="p-key">Description:</span>
+                <span class="p-value">{{issue.fields.description}}</span>
+            </div>
+        {{/if}}
+    {{/each}}
 {{/if}}

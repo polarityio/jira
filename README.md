@@ -9,7 +9,7 @@ View the integration in action:
 
 ## Jira Integration Options
 
-### Jira URL
+### Jira Base URL
 
 URL used to access your instance of Jira.
 
@@ -17,9 +17,9 @@ URL used to access your instance of Jira.
 
 Username used for individual to access Jira.
 
-### API Key
+### API Token or Password
 
-Jira API Key, can be generated from a users profile page in Jira.
+Jira API token (For Jira Cloud) or Jira Password (For Jira Server).
 
 https://id.atlassian.com/manage/api-tokens
 
