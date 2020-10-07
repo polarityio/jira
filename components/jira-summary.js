@@ -16,7 +16,7 @@ polarity.export = PolarityComponent.extend({
       issueData.push("Ticket Status: " + this.get('details.fields.status.name'));
       issueData.push("Issue Type: " + this.get('details.fields.issuetype.name'));
       issueData.push(this.get('details.fields.summary'));
-      issueData.push("Assignee: " + this.get('details.fields.assignee.name'));
+      issueData.push("Assignee: " + this.get('details.fields.assignee.displayName'));
     }
     return issueData;
   }),
