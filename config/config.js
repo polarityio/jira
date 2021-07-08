@@ -54,7 +54,7 @@ module.exports = {
     proxy: '',
     /**
      * If set to false, the integration will ignore SSL errors.  This will allow the integration to connect
-     * to the MISP servers without valid SSL certificates.  Please note that we do NOT recommending setting this
+     * to the servers without valid SSL certificates.  Please note that we do NOT recommending setting this
      * to false in a production environment.
      */
     rejectUnauthorized: true
