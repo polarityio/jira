@@ -1,6 +1,7 @@
 'use strict';
 let request = require('request');
 let _ = require('lodash');
+let { replace } = require('lodash/fp');
 let async = require('async');
 let config = require('./config/config');
 let util = require('util');
@@ -44,41 +45,16 @@ function doLookup(entities, options, cb) {
   async.each(
     entities,
     function (entityObj, next) {
-      if (entityObj.isDomain || entityObj.isEmail || entityObj.isIPv4 || entityObj.isIPv6) {
-        _lookupEntity(entityObj, options, function (err, issue) {
-          if (err) {
-            next(err);
-          } else {
-            lookupIssues.push(issue);
-
-            log.trace(
-              {
-                issue: issue
-              },
-              'Checking Issues'
-            );
-            next(null);
-          }
-        });
-      } else if (entityObj.type === 'custom') {
-        _lookupEntityIssue(entityObj, options, function (err, issue) {
-          if (err) {
-            next(err);
-          } else {
-            lookupIssues.push(issue);
-            log.trace(
-              {
-                issue: issue
-              },
-              'Checking Issues'
-            );
-            next(null);
-          }
-        });
-      } else {
-        lookupIssues.push({ entity: entityObj, data: null }); //Cache the missed results
+      const queryFunction = entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0
+          ? _lookupEntityIssue
+          : _lookupEntity
+      
+      queryFunction(entityObj, options, function (err, issue) {
+        if (err) return next(err);
+        lookupIssues.push(issue);
+        log.trace({ issue }, 'Checking Issues');
         next(null);
-      }
+      });
     },
     function (err) {
       cb(err, lookupIssues);
@@ -173,7 +149,11 @@ function _lookupEntity(entityObj, options, cb) {
   //  entity: entityObj
   //}, "Checking to see if data is moving");
 
-  let uri = options.baseUrl + '/rest/api/2/search?jql=text~' + JSON.stringify(entityObj.value);
+  const jqlSpecialCharacters = /[\[\]\+\-\&\|\!\(\)\{\}\^\~\*\\\/\:]|(?:\w(?=\.))|(?:\.\w)/g
+  let uri =
+    options.baseUrl +
+    '/rest/api/2/search?jql=text~' +
+    JSON.stringify(encodeURIComponent(replace(jqlSpecialCharacters, '??', entityObj.value)));
 
   requestWithDefaults(
     {
