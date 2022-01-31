@@ -29,13 +29,13 @@ module.exports = {
       key: 'jira',
       regex: /[A-Z]{1,10}-\d{1,10}/
     },
-    {
-      key: 'possiblyDefangedUrl',
-      regex:
-        /(?:[a-zA-Z]+(?:\[(?!\])|(?<!\[)\]|:|\/{2}){1,5}(?:(?<!\[)\]|\/{2}))?(?:(?:\w+(?:\[(?!\])|(?<!\[)\]|\.){1,3})+\w+)(?:\/(?:\w+|\-|(?:\[(?!\])|(?<!\[)\]|\.){1,3})+)*(?:\/?\??(?:\w+\=(?:\w|\/)+\&?))*/
-    }
+    // {
+    //   key: 'possiblyDefangedUrl',
+    //   regex:
+    //     /(?:[a-zA-Z]+(?:\[(?!\])|(?<!\[)\]|:|\/{2}){1,5}(?:(?<!\[)\]|\/{2}))?(?:(?:\w+(?:\[(?!\])|(?<!\[)\]|\.){1,3})+\w+)(?:\/(?:\w+|\-|(?:\[(?!\])|(?<!\[)\]|\.){1,3})+)*(?:\/?\??(?:\w+\=(?:\w|\/)+\&?))*/
+    // }
   ],
-  entityTypes: ['domain', 'email', 'IPv4', 'IPv6'],
+  entityTypes: ['domain', 'email', 'IPv4', 'IPv6', 'url'],
   logging: {
     level: 'info', //trace, debug, info, warn, error, fatal
     fileName: 'integration.log',
