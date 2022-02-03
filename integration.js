@@ -1,7 +1,7 @@
 'use strict';
 let request = require('request');
 let _ = require('lodash');
-let { replace } = require('lodash/fp');
+let { replace, filter, includes, size } = require('lodash/fp');
 let async = require('async');
 let config = require('./config/config');
 let util = require('util');
@@ -35,12 +35,7 @@ function startup(logger) {
 function doLookup(entities, options, cb) {
   let lookupIssues = [];
 
-  log.trace(
-    {
-      entity: entities
-    },
-    'Checking to see if data is moving'
-  );
+  log.trace({ entities }, 'Checking to see if data is moving');
 
   async.each(
     entities,
@@ -52,7 +47,7 @@ function doLookup(entities, options, cb) {
       queryFunction(entityObj, options, function (err, issue) {
         if (err) return next(err);
         lookupIssues.push(issue);
-        log.trace({ issue }, 'Checking Issues');
+        log.trace({ entityObj, issue }, 'Checking Issues');
         next(null);
       });
     },
@@ -71,7 +66,6 @@ function _lookupEntityIssue(entityObj, options, cb) {
   );
 
   let uri = options.baseUrl + '/rest/api/2/issue/' + entityObj.value;
-  let url = options.baseUrl;
   requestWithDefaults(
     {
       uri: uri,
@@ -145,15 +139,24 @@ function _lookupEntityIssue(entityObj, options, cb) {
 }
 
 function _lookupEntity(entityObj, options, cb) {
-  //log.trace({
-  //  entity: entityObj
-  //}, "Checking to see if data is moving");
+  if (
+    entityObj.type === 'custom' &&
+    entityObj.types.indexOf('custom.searchDefangedUrls') >= 0 &&
+    !options.searchDefangedUrls
+  ) {
+    return cb(null, {
+      entity: entityObj,
+      isVolatile: true,
+      data: null
+    });
+  }
 
-  const jqlSpecialCharacters = /[\[\]\+\-\&\|\!\(\)\{\}\^\~\*\\\/\:]|(?:\w(?=\.))|(?:\.\w)/g
+  const jqlSpecialCharacters = /[\[\]\+\-\&\|\!\(\)\{\}\^\~\*\\\/\:]/g;
+  const replaceCharacters = /[\[\]\+\-\&\|\!\(\)\{\}\^\~\*\\\/\:]|(?:\w(?=\.))|(?:(?<=\.)\w)/g;
   let uri =
-    options.baseUrl +
-    '/rest/api/2/search?jql=text~' +
-    JSON.stringify(encodeURIComponent(replace(jqlSpecialCharacters, '??', entityObj.value)));
+    jqlSpecialCharacters.test(entityObj.value) || options.reduceSearchFuzziness
+      ? `${options.baseUrl}/rest/api/2/search?jql=text~'"${replace(replaceCharacters, '*', entityObj.value)}"'`
+      : `${options.baseUrl}/rest/api/2/search?jql=text~"${replace(replaceCharacters, '*', entityObj.value)}"`;
 
   requestWithDefaults(
     {
@@ -175,13 +178,6 @@ function _lookupEntity(entityObj, options, cb) {
         });
         return;
       }
-
-      log.trace(
-        {
-          body: body
-        },
-        'Return Data occuring'
-      );
 
       // If we get a 404 then cache a miss
       if (response.statusCode === 404) {

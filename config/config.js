@@ -29,11 +29,11 @@ module.exports = {
       key: 'jira',
       regex: /[A-Z]{1,10}-\d{1,10}/
     },
-    // {
-    //   key: 'possiblyDefangedUrl',
-    //   regex:
-    //     /(?:[a-zA-Z]+(?:\[(?!\])|(?<!\[)\]|:|\/{2}){1,5}(?:(?<!\[)\]|\/{2}))?(?:(?:\w+(?:\[(?!\])|(?<!\[)\]|\.){1,3})+\w+)(?:\/(?:\w+|\-|(?:\[(?!\])|(?<!\[)\]|\.){1,3})+)*(?:\/?\??(?:\w+\=(?:\w|\/)+\&?))*/
-    // }
+    {
+      key: 'possiblyDefangedUrl',
+      regex:
+        /(?:[a-zA-Z]+(?:\[(?!\])|(?<!\[)\]|:|\/{2}){1,5}(?:(?<!\[)\]|\/{2}))?(?:(?:\w+(?:\[(?!\])|(?<!\[)\]|\.){1,3})+\w+)(?:\/(?:\w+|\-|(?:\[(?!\])|(?<!\[)\]|\.){1,3})+)*(?:\/?\??(?:\w+\=(?:\w|\/)+\&?))*/g
+    }
   ],
   entityTypes: ['domain', 'email', 'IPv4', 'IPv6', 'url'],
   logging: {
@@ -272,6 +272,25 @@ module.exports = {
       name: 'Jira Issue Search',
       description: 'If checked, the integration will search keywords/phrases in Jira issues',
       default: true,
+      type: 'boolean',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'searchDefangedUrls',
+      name: 'Search for Defanged Urls',
+      description: 'If checked, the integration will search Defanged Urls in Jira issues',
+      default: flase,
+      type: 'boolean',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'reduceSearchFuzziness',
+      name: 'Reduce Search Fuzziness',
+      description:
+        'If checked, the integration will return fewer results with more of an exact string match on your entities.',
+      default: false,
       type: 'boolean',
       userCanEdit: true,
       adminOnly: false
