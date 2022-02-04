@@ -1,7 +1,7 @@
 'use strict';
 let request = require('request');
 let _ = require('lodash');
-let { replace, filter, includes, size } = require('lodash/fp');
+let { replace, filter, includes, split, join, compact, flow, get } = require('lodash/fp');
 let async = require('async');
 let config = require('./config/config');
 let util = require('util');
@@ -141,7 +141,7 @@ function _lookupEntityIssue(entityObj, options, cb) {
 function _lookupEntity(entityObj, options, cb) {
   if (
     entityObj.type === 'custom' &&
-    entityObj.types.indexOf('custom.searchDefangedUrls') >= 0 &&
+    entityObj.types.indexOf('custom.possiblyDefangedUrl') >= 0 &&
     !options.searchDefangedUrls
   ) {
     return cb(null, {
@@ -150,14 +150,8 @@ function _lookupEntity(entityObj, options, cb) {
       data: null
     });
   }
-
-  const jqlSpecialCharacters = /[\[\]\+\-\&\|\!\(\)\{\}\^\~\*\\\/\:]/g;
-  const replaceCharacters = /[\[\]\+\-\&\|\!\(\)\{\}\^\~\*\\\/\:]|(?:\w(?=\.))|(?:(?<=\.)\w)/g;
-  let uri =
-    jqlSpecialCharacters.test(entityObj.value) || options.reduceSearchFuzziness
-      ? `${options.baseUrl}/rest/api/2/search?jql=text~'"${replace(replaceCharacters, '*', entityObj.value)}"'`
-      : `${options.baseUrl}/rest/api/2/search?jql=text~"${replace(replaceCharacters, '*', entityObj.value)}"`;
-
+  
+  let uri = `${options.baseUrl}/rest/api/2/search?jql=text~'${flow(split(/[^\w]/g), compact, join('*'))(entityObj.value)}' ORDER BY updated DESC`;
   requestWithDefaults(
     {
       uri: uri,
@@ -204,7 +198,18 @@ function _lookupEntity(entityObj, options, cb) {
         return;
       }
 
-      if (_.isNull(body) || _.isEmpty(body.issues)) {
+      let details = body
+      if(options.reduceSearchFuzziness) {
+        details = {
+          ...body,
+          issues: flow(
+            get('issues'),
+            filter(flow(JSON.stringify, replace(/[^\w]/g, ''), includes(replace(/[^\w]/g, '', entityObj.value))))
+          )(body)
+        };
+      }
+
+      if (_.isNull(details) || _.isEmpty(details.issues)) {
         cb(null, {
           entity: entityObj,
           data: null // setting data to null indicates to the server that this entity lookup was a "miss"
@@ -221,7 +226,7 @@ function _lookupEntity(entityObj, options, cb) {
           // Required: These are the tags that are displayed in your template
           summary: [],
           // Data that you want to pass back to the notification window details block
-          details: body
+          details
         }
       });
     }

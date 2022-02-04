@@ -32,10 +32,11 @@ module.exports = {
     {
       key: 'possiblyDefangedUrl',
       regex:
-        /(?:[a-zA-Z]+(?:\[(?!\])|(?<!\[)\]|:|\/{2}){1,5}(?:(?<!\[)\]|\/{2}))?(?:(?:\w+(?:\[(?!\])|(?<!\[)\]|\.){1,3})+\w+)(?:\/(?:\w+|\-|(?:\[(?!\])|(?<!\[)\]|\.){1,3})+)*(?:\/?\??(?:\w+\=(?:\w|\/)+\&?))*/g
+        /(?:\w+(?:(?:\[:\]\/\/)|(?::\/\/)|(?:\[:\/\/\])))?(?:\w+\.|(?:\w+\[\.\]))+\w+(?:\/(?:[\/=\.\[\]\w&#@$%?-])*)?/
     }
   ],
   entityTypes: ['domain', 'email', 'IPv4', 'IPv6', 'url'],
+  defaultColor: 'light-blue',
   logging: {
     level: 'info', //trace, debug, info, warn, error, fatal
     fileName: 'integration.log',
@@ -280,7 +281,7 @@ module.exports = {
       key: 'searchDefangedUrls',
       name: 'Search for Defanged Urls',
       description: 'If checked, the integration will search Defanged Urls in Jira issues',
-      default: flase,
+      default: false,
       type: 'boolean',
       userCanEdit: true,
       adminOnly: false
