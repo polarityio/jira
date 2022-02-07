@@ -151,7 +151,12 @@ function _lookupEntity(entityObj, options, cb) {
     });
   }
   
-  let uri = `${options.baseUrl}/rest/api/2/search?jql=text~'${flow(split(/[^\w]/g), compact, join('*'))(entityObj.value)}' ORDER BY updated DESC`;
+  let uri = `${options.baseUrl}/rest/api/2/search?jql=text~'${flow(
+    split(/[^\w]/g),
+    compact,
+    join(' ')
+  )(entityObj.value)}' ORDER BY updated DESC`;
+
   requestWithDefaults(
     {
       uri: uri,
@@ -164,6 +169,8 @@ function _lookupEntity(entityObj, options, cb) {
       json: true
     },
     function (err, response, body) {
+      log.trace({ jqlQuery: uri, body, err }, 'JQL Query and Result');
+      
       // check for a request error
       if (err) {
         cb({
