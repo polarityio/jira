@@ -29,11 +29,11 @@ module.exports = {
       key: 'jira',
       regex: /[A-Z]{1,10}-\d{1,10}/
     },
-    {
-      key: 'possiblyDefangedUrl',
-      regex:
-        /(?:\w+(?:(?:\[:\]\/\/)|(?::\/\/)|(?:\[:\/\/\])))?(?:\w+\.|(?:\w+\[\.\]))+\w+(?:\/(?:[\/=\.\[\]\w&#@$%?-])*)?/
-    }
+    // {
+    //   key: 'possiblyDefangedUrl',
+    //   regex:
+    //     /(?:\w+(?:(?:\[:\]\/\/)|(?::\/\/)|(?:\[:\/\/\])))?(?:\w+\.|(?:\w+\[\.\]))+\w+(?:\/(?:[\/=\.\[\]\w&#@$%?-])*)?/
+    // }
   ],
   entityTypes: ['domain', 'email', 'IPv4', 'IPv6', 'url'],
   defaultColor: 'light-blue',
@@ -273,15 +273,6 @@ module.exports = {
       name: 'Jira Issue Search',
       description: 'If checked, the integration will search keywords/phrases in Jira issues',
       default: true,
-      type: 'boolean',
-      userCanEdit: true,
-      adminOnly: false
-    },
-    {
-      key: 'searchDefangedUrls',
-      name: 'Search for Defanged Urls',
-      description: 'If checked, the integration will search Defanged Urls in Jira issues',
-      default: false,
       type: 'boolean',
       userCanEdit: true,
       adminOnly: false

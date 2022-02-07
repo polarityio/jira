@@ -138,19 +138,7 @@ function _lookupEntityIssue(entityObj, options, cb) {
   );
 }
 
-function _lookupEntity(entityObj, options, cb) {
-  if (
-    entityObj.type === 'custom' &&
-    entityObj.types.indexOf('custom.possiblyDefangedUrl') >= 0 &&
-    !options.searchDefangedUrls
-  ) {
-    return cb(null, {
-      entity: entityObj,
-      isVolatile: true,
-      data: null
-    });
-  }
-  
+function _lookupEntity(entityObj, options, cb) {  
   let uri = `${options.baseUrl}/rest/api/2/search?jql=text~'${flow(
     split(/[^\w]/g),
     compact,

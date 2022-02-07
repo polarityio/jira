@@ -26,10 +26,6 @@ https://id.atlassian.com/manage/api-tokens
 ### Jira Issue Search
 If checked, the integration will search keywords/phrases in Jira issues
 
-### Search for Defanged Urls
-If checked, the integration will search Defanged Urls in Jira issues
-
-
 ### Reduce Search Fuzziness
 If checked, the integration will return fewer results with more of an exact string match on your entities.
 
