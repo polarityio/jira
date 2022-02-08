@@ -1,6 +1,7 @@
 'use strict';
 let request = require('request');
 let _ = require('lodash');
+let { replace, filter, includes, split, join, compact, flow, get } = require('lodash/fp');
 let async = require('async');
 let config = require('./config/config');
 let util = require('util');
@@ -34,51 +35,21 @@ function startup(logger) {
 function doLookup(entities, options, cb) {
   let lookupIssues = [];
 
-  log.trace(
-    {
-      entity: entities
-    },
-    'Checking to see if data is moving'
-  );
+  log.trace({ entities }, 'Checking to see if data is moving');
 
   async.each(
     entities,
     function (entityObj, next) {
-      if (entityObj.isDomain || entityObj.isEmail || entityObj.isIPv4 || entityObj.isIPv6) {
-        _lookupEntity(entityObj, options, function (err, issue) {
-          if (err) {
-            next(err);
-          } else {
-            lookupIssues.push(issue);
-
-            log.trace(
-              {
-                issue: issue
-              },
-              'Checking Issues'
-            );
-            next(null);
-          }
-        });
-      } else if (entityObj.type === 'custom') {
-        _lookupEntityIssue(entityObj, options, function (err, issue) {
-          if (err) {
-            next(err);
-          } else {
-            lookupIssues.push(issue);
-            log.trace(
-              {
-                issue: issue
-              },
-              'Checking Issues'
-            );
-            next(null);
-          }
-        });
-      } else {
-        lookupIssues.push({ entity: entityObj, data: null }); //Cache the missed results
+      const queryFunction = entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0
+          ? _lookupEntityIssue
+          : _lookupEntity
+      
+      queryFunction(entityObj, options, function (err, issue) {
+        if (err) return next(err);
+        lookupIssues.push(issue);
+        log.trace({ entityObj, issue }, 'Checking Issues');
         next(null);
-      }
+      });
     },
     function (err) {
       cb(err, lookupIssues);
@@ -95,7 +66,6 @@ function _lookupEntityIssue(entityObj, options, cb) {
   );
 
   let uri = options.baseUrl + '/rest/api/2/issue/' + entityObj.value;
-  let url = options.baseUrl;
   requestWithDefaults(
     {
       uri: uri,
@@ -168,12 +138,12 @@ function _lookupEntityIssue(entityObj, options, cb) {
   );
 }
 
-function _lookupEntity(entityObj, options, cb) {
-  //log.trace({
-  //  entity: entityObj
-  //}, "Checking to see if data is moving");
-
-  let uri = options.baseUrl + '/rest/api/2/search?jql=text~' + JSON.stringify(entityObj.value);
+function _lookupEntity(entityObj, options, cb) {  
+  let uri = `${options.baseUrl}/rest/api/2/search?jql=text~'${flow(
+    split(/[^\w]/g),
+    compact,
+    join(' ')
+  )(entityObj.value)}' ORDER BY updated DESC`;
 
   requestWithDefaults(
     {
@@ -187,6 +157,8 @@ function _lookupEntity(entityObj, options, cb) {
       json: true
     },
     function (err, response, body) {
+      log.trace({ jqlQuery: uri, body, err }, 'JQL Query and Result');
+      
       // check for a request error
       if (err) {
         cb({
@@ -195,13 +167,6 @@ function _lookupEntity(entityObj, options, cb) {
         });
         return;
       }
-
-      log.trace(
-        {
-          body: body
-        },
-        'Return Data occuring'
-      );
 
       // If we get a 404 then cache a miss
       if (response.statusCode === 404) {
@@ -228,7 +193,18 @@ function _lookupEntity(entityObj, options, cb) {
         return;
       }
 
-      if (_.isNull(body) || _.isEmpty(body.issues)) {
+      let details = body
+      if(options.reduceSearchFuzziness) {
+        details = {
+          ...body,
+          issues: flow(
+            get('issues'),
+            filter(flow(JSON.stringify, replace(/[^\w]/g, ''), includes(replace(/[^\w]/g, '', entityObj.value))))
+          )(body)
+        };
+      }
+
+      if (_.isNull(details) || _.isEmpty(details.issues)) {
         cb(null, {
           entity: entityObj,
           data: null // setting data to null indicates to the server that this entity lookup was a "miss"
@@ -245,7 +221,7 @@ function _lookupEntity(entityObj, options, cb) {
           // Required: These are the tags that are displayed in your template
           summary: [],
           // Data that you want to pass back to the notification window details block
-          details: body
+          details
         }
       });
     }
