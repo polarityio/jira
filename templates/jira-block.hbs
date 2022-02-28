@@ -200,10 +200,10 @@
                 <span class="p-value">{{issue.fields.priority.name}}</span>
             </div>
         {{/if}}
-        {{#if issue.fields.creator.accountId}}
+        {{#if (and issue.fields.reporter.accountId issue.fields.reporter.displayName)}}
             <div>
-                <span class="p-key">Creator Name:</span>
-                <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.creator.accountId}}" target="_blank">{{issue.fields.creator.name}}</a></span>
+                <span class="p-key">Reporter Name:</span>
+                <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.reporter.accountId}}" target="_blank">{{issue.fields.reporter.displayName}}</a></span>
             </div>
         {{/if}}
         {{#if issue.fields.create}}
