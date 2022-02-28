@@ -1,7 +1,7 @@
 'use strict';
 let request = require('request');
 let _ = require('lodash');
-let { replace, filter, includes, split, join, compact, flow, get } = require('lodash/fp');
+let { replace, filter, includes, split, join, compact, flow, get, toLower } = require('lodash/fp');
 let async = require('async');
 let config = require('./config/config');
 let util = require('util');
@@ -199,7 +199,7 @@ function _lookupEntity(entityObj, options, cb) {
           ...body,
           issues: flow(
             get('issues'),
-            filter(flow(JSON.stringify, replace(/[^\w]/g, ''), includes(replace(/[^\w]/g, '', entityObj.value))))
+            filter(flow(JSON.stringify, toLower, replace(/[^\w]/g, ''), includes(replace(/[^\w]/g, '', toLower(entityObj.value)))))
           )(body)
         };
       }

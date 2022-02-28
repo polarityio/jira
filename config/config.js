@@ -282,7 +282,7 @@ module.exports = {
       name: 'Reduce Search Fuzziness',
       description:
         'If checked, the integration will return fewer results with more of an exact string match on your entities.',
-      default: true,
+      default: false,
       type: 'boolean',
       userCanEdit: true,
       adminOnly: false
