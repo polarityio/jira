@@ -69,7 +69,7 @@
     {{#if details.fields.description}}
         <div>
             <span class="p-key">Description:</span>
-            <span class="p-value">{{details.fields.description}}</span>
+            <span class="description">{{details.fields.description}}</span>
         </div>
     {{/if}}
 
@@ -95,7 +95,7 @@
             {{#if version.description}}
                 <div>
                     <span class="p-key">Version Description:</span>
-                    <span class="p-value">{{version.description}}</span>
+                    <span class="description">{{version.description}}</span>
                 </div>
             {{/if}}
         {{/each}}
@@ -137,29 +137,31 @@
         </div>
     {{/if}}
 
-    <h1 class="p-title">
-        {{fa-icon "info-circle"}} Issues Created Information
-    </h1>
+    {{#if (or details.fields.creator.name details.fields.creator.emailAddress details.fields.reporter.name)}}
+        <h1 class="p-title">
+            {{fa-icon "info-circle"}} Issues Created Information
+        </h1>
 
-    {{#if details.fields.creator.name}}
-        <div>
-            <span class="p-key">Issue Creator:</span>
-            <span class="p-value">{{details.fields.creator.name}}</span>
-        </div>
-    {{/if}}
+        {{#if details.fields.creator.name}}
+            <div>
+                <span class="p-key">Issue Creator:</span>
+                <span class="p-value">{{details.fields.creator.name}}</span>
+            </div>
+        {{/if}}
 
-    {{#if details.fields.creator.emailAddress}}
-        <div>
-            <span class="p-key">Issue Creator Email:</span>
-            <span class="p-value">{{details.fields.creator.emailAddress}}</span>
-        </div>
-    {{/if}}
+        {{#if details.fields.creator.emailAddress}}
+            <div>
+                <span class="p-key">Issue Creator Email:</span>
+                <span class="p-value">{{details.fields.creator.emailAddress}}</span>
+            </div>
+        {{/if}}
 
-    {{#if details.fields.reporter.name}}
-        <div>
-            <span class="p-key">Issue Reporter:</span>
-            <span class="p-value">{{details.fields.reporter.name}}</span>
-        </div>
+        {{#if details.fields.reporter.name}}
+            <div>
+                <span class="p-key">Issue Reporter:</span>
+                <span class="p-value">{{details.fields.reporter.name}}</span>
+            </div>
+        {{/if}}
     {{/if}}
 
     <h1 class="p-title">
@@ -221,7 +223,7 @@
         {{#if issue.fields.description}}
             <div>
                 <span class="p-key">Description:</span>
-                <span class="p-value">{{issue.fields.description}}</span>
+                <span class="description">{{issue.fields.description}}</span>
             </div>
         {{/if}}
     {{/each}}
