@@ -1,10 +1,11 @@
 'use strict';
-let request = require('request');
-let _ = require('lodash');
-let { replace, filter, includes, split, join, compact, flow, get, toLower } = require('lodash/fp');
-let async = require('async');
-let config = require('./config/config');
-let util = require('util');
+const request = require('postman-request');
+const _ = require('lodash');
+const { replace, filter, includes, split, join, compact, flow, get, toLower } = require('lodash/fp');
+const async = require('async');
+const fs = require('fs');
+const config = require('./config/config');
+
 let log = null;
 let requestWithDefaults;
 
@@ -228,7 +229,43 @@ function _lookupEntity(entityObj, options, cb) {
   );
 }
 
+function validateOptions(userOptions, cb) {
+  let errors = [];
+  if (
+      typeof userOptions.apiKey.value !== 'string' ||
+      (typeof userOptions.apiKey.value === 'string' && userOptions.apiKey.value.length === 0)
+  ) {
+    errors.push({
+      key: 'apiKey',
+      message: 'You must provide your Jira API key or Password'
+    });
+  }
+
+  if (
+      typeof userOptions.userName.value !== 'string' ||
+      (typeof userOptions.userName.value === 'string' && userOptions.userName.value.length === 0)
+  ) {
+    errors.push({
+      key: 'userName',
+      message: 'You must provide a username'
+    });
+  }
+
+  if (
+      typeof userOptions.baseUrl.value !== 'string' ||
+      (typeof userOptions.baseUrl.value === 'string' && userOptions.baseUrl.value.length === 0)
+  ) {
+    errors.push({
+      key: 'baseUrl',
+      message: 'You must provide a Jira base URL'
+    });
+  }
+
+  cb(null, errors);
+}
+
 module.exports = {
-  doLookup: doLookup,
-  startup: startup
+  doLookup,
+  startup,
+  validateOptions
 };
