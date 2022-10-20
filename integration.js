@@ -41,10 +41,9 @@ function doLookup(entities, options, cb) {
   async.each(
     entities,
     function (entityObj, next) {
-      const queryFunction = entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0
-          ? _lookupEntityIssue
-          : _lookupEntity
-      
+      const queryFunction =
+        entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0 ? _lookupEntityIssue : _lookupEntity;
+
       queryFunction(entityObj, options, function (err, issue) {
         if (err) return next(err);
         lookupIssues.push(issue);
@@ -139,7 +138,7 @@ function _lookupEntityIssue(entityObj, options, cb) {
   );
 }
 
-function _lookupEntity(entityObj, options, cb) {  
+function _lookupEntity(entityObj, options, cb) {
   let uri = `${options.baseUrl}/rest/api/2/search?jql=text~'${flow(
     split(/[^\w]/g),
     compact,
@@ -159,7 +158,7 @@ function _lookupEntity(entityObj, options, cb) {
     },
     function (err, response, body) {
       log.trace({ jqlQuery: uri, body, err }, 'JQL Query and Result');
-      
+
       // check for a request error
       if (err) {
         cb({
@@ -194,13 +193,20 @@ function _lookupEntity(entityObj, options, cb) {
         return;
       }
 
-      let details = body
-      if(options.reduceSearchFuzziness) {
+      let details = body;
+      if (options.reduceSearchFuzziness) {
         details = {
           ...body,
           issues: flow(
             get('issues'),
-            filter(flow(JSON.stringify, toLower, replace(/[^\w]/g, ''), includes(replace(/[^\w]/g, '', toLower(entityObj.value)))))
+            filter(
+              flow(
+                JSON.stringify,
+                toLower,
+                replace(/[^\w]/g, ''),
+                includes(replace(/[^\w]/g, '', toLower(entityObj.value)))
+              )
+            )
           )(body)
         };
       }
@@ -232,8 +238,8 @@ function _lookupEntity(entityObj, options, cb) {
 function validateOptions(userOptions, cb) {
   let errors = [];
   if (
-      typeof userOptions.apiKey.value !== 'string' ||
-      (typeof userOptions.apiKey.value === 'string' && userOptions.apiKey.value.length === 0)
+    typeof userOptions.apiKey.value !== 'string' ||
+    (typeof userOptions.apiKey.value === 'string' && userOptions.apiKey.value.length === 0)
   ) {
     errors.push({
       key: 'apiKey',
@@ -242,8 +248,8 @@ function validateOptions(userOptions, cb) {
   }
 
   if (
-      typeof userOptions.userName.value !== 'string' ||
-      (typeof userOptions.userName.value === 'string' && userOptions.userName.value.length === 0)
+    typeof userOptions.userName.value !== 'string' ||
+    (typeof userOptions.userName.value === 'string' && userOptions.userName.value.length === 0)
   ) {
     errors.push({
       key: 'userName',
@@ -252,8 +258,8 @@ function validateOptions(userOptions, cb) {
   }
 
   if (
-      typeof userOptions.baseUrl.value !== 'string' ||
-      (typeof userOptions.baseUrl.value === 'string' && userOptions.baseUrl.value.length === 0)
+    typeof userOptions.baseUrl.value !== 'string' ||
+    (typeof userOptions.baseUrl.value === 'string' && userOptions.baseUrl.value.length === 0)
   ) {
     errors.push({
       key: 'baseUrl',
