@@ -1,12 +1,14 @@
 'use strict';
-let request = require('request');
-let _ = require('lodash');
-let { replace, filter, includes, split, join, compact, flow, get, toLower } = require('lodash/fp');
-let async = require('async');
-let config = require('./config/config');
-let util = require('util');
+const request = require('postman-request');
+const _ = require('lodash');
+const { replace, filter, includes, split, join, compact, flow, get, toLower, map, nth, eq, reduce, flatten } = require('lodash/fp');
+const async = require('async');
+const fs = require('fs');
+const config = require('./config/config');
+
 let log = null;
 let requestWithDefaults;
+let requestAsync;
 
 function startup(logger) {
   log = logger;
@@ -30,6 +32,13 @@ function startup(logger) {
     defaults.rejectUnauthorized = config.request.rejectUnauthorized;
   }
   requestWithDefaults = request.defaults(defaults);
+  requestAsync = (requestOptions) =>
+    new Promise((resolve, reject) => {
+      requestWithDefaults(requestOptions, (err, res, body) => {
+        if (err) return reject(err);
+        resolve({ ...res, body });
+      });
+    });
 }
 
 function doLookup(entities, options, cb) {
@@ -40,10 +49,9 @@ function doLookup(entities, options, cb) {
   async.each(
     entities,
     function (entityObj, next) {
-      const queryFunction = entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0
-          ? _lookupEntityIssue
-          : _lookupEntity
-      
+      const queryFunction =
+        entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0 ? _lookupEntityIssue : _lookupEntity;
+
       queryFunction(entityObj, options, function (err, issue) {
         if (err) return next(err);
         lookupIssues.push(issue);
@@ -138,17 +146,13 @@ function _lookupEntityIssue(entityObj, options, cb) {
   );
 }
 
-function _lookupEntity(entityObj, options, cb) {  
-  let uri = `${options.baseUrl}/rest/api/2/search?jql=text~'${flow(
-    split(/[^\w]/g),
-    compact,
-    join(' ')
-  )(entityObj.value)}' ORDER BY updated DESC`;
-
+function _lookupEntity(entityObj, options, cb) {
+  const jqlQuery = `text ~ "${flow(split(/[^\w]/g), compact, join(' '))(entityObj.value)}" ORDER BY updated DESC`
   requestWithDefaults(
     {
-      uri: uri,
       method: 'GET',
+      uri: `${options.baseUrl}/rest/api/2/search`,
+      qs: { jql: jqlQuery },
       followAllRedirects: true,
       auth: {
         username: options.userName,
@@ -156,9 +160,9 @@ function _lookupEntity(entityObj, options, cb) {
       },
       json: true
     },
-    function (err, response, body) {
-      log.trace({ jqlQuery: uri, body, err }, 'JQL Query and Result');
-      
+    async (err, response, body) => {
+      log.trace({ jqlQuery, body, err }, 'JQL Query and Result');
+
       // check for a request error
       if (err) {
         cb({
@@ -193,14 +197,20 @@ function _lookupEntity(entityObj, options, cb) {
         return;
       }
 
-      let details = body
-      if(options.reduceSearchFuzziness) {
+      let details = body;
+      if (options.reduceSearchFuzziness) {
+        const issuesWithComments = await getCommentsAndAddToIssues(body, options);
         details = {
           ...body,
-          issues: flow(
-            get('issues'),
-            filter(flow(JSON.stringify, toLower, replace(/[^\w]/g, ''), includes(replace(/[^\w]/g, '', toLower(entityObj.value)))))
-          )(body)
+          issues: filter(
+            flow(
+              JSON.stringify,
+              toLower,
+              replace(/[^\w]/g, ''),
+              includes(replace(/[^\w]/g, '', toLower(entityObj.value)))
+            ),
+            issuesWithComments
+          )
         };
       }
 
@@ -228,7 +238,90 @@ function _lookupEntity(entityObj, options, cb) {
   );
 }
 
+const getCommentsAndAddToIssues = async (body, options) => {
+  const issues = get('issues', body);
+  if(!options.searchComments) return issues;
+
+  const commentsForAllFoundIssues = flatten(
+    await Promise.all(
+      map(
+        flow(get('id'), async (issueId) =>
+          get(
+            'body.comments',
+            await requestAsync({
+              method: 'GET',
+              uri: `${options.baseUrl}/rest/api/3/issue/${issueId}/comment`,
+              followAllRedirects: true,
+              auth: {
+                username: options.userName,
+                password: options.apiKey
+              },
+              json: true
+            })
+          )
+        ),
+        issues
+      )
+    )
+  );
+
+  const issuesWithComments = map(
+    (issue) => ({
+      ...issue,
+      comments: reduce(
+        (agg, comment) =>
+          /* The "self" property on the comment is a url that contains the "issueId" in 
+           * the path "https://{{url}}/rest/api/3/issue/{{issueId}}/comment/{{commentId}}"
+           * which is used here to correlate comments to the issue
+          **/
+          flow(get('self'), split('/'), nth(7), eq(issue.id))(comment) ? [...agg, get('body.content', comment)] : agg,
+        [],
+        commentsForAllFoundIssues
+      )
+    }),
+    issues
+  );
+
+  return issuesWithComments;
+};
+
+function validateOptions(userOptions, cb) {
+  let errors = [];
+  if (
+    typeof userOptions.apiKey.value !== 'string' ||
+    (typeof userOptions.apiKey.value === 'string' && userOptions.apiKey.value.length === 0)
+  ) {
+    errors.push({
+      key: 'apiKey',
+      message: 'You must provide your Jira API key or Password'
+    });
+  }
+
+  if (
+    typeof userOptions.userName.value !== 'string' ||
+    (typeof userOptions.userName.value === 'string' && userOptions.userName.value.length === 0)
+  ) {
+    errors.push({
+      key: 'userName',
+      message: 'You must provide a username'
+    });
+  }
+
+  if (
+    typeof userOptions.baseUrl.value !== 'string' ||
+    (typeof userOptions.baseUrl.value === 'string' && userOptions.baseUrl.value.length === 0)
+  ) {
+    errors.push({
+      key: 'baseUrl',
+      message: 'You must provide a Jira base URL'
+    });
+  }
+
+  cb(null, errors);
+}
+
 module.exports = {
-  doLookup: doLookup,
-  startup: startup
+  doLookup,
+  startup,
+  validateOptions
 };
