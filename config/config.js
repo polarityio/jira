@@ -281,7 +281,17 @@ module.exports = {
       key: 'reduceSearchFuzziness',
       name: 'Reduce Search Fuzziness',
       description:
-        'If checked, the integration will return fewer results with more of an exact string match on your entities.',
+        'If checked, the integration will return fewer results with an exact string match on your entities.',
+      default: true,
+      type: 'boolean',
+      userCanEdit: true,
+      adminOnly: false
+    },
+    {
+      key: 'searchComments',
+      name: 'Search Comments',
+      description:
+        'If checked, the integration will search your entities in the comments.',
       default: true,
       type: 'boolean',
       userCanEdit: true,

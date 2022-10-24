@@ -27,8 +27,10 @@ https://id.atlassian.com/manage/api-tokens
 If checked, the integration will search keywords/phrases in Jira issues
 
 ### Reduce Search Fuzziness
-If checked, the integration will return fewer results with more of an exact string match on your entities.
+If checked, the integration will return fewer results with an exact string match on your entities.
 
+### Search Comments
+If checked, the integration will search your entities in the comments.
 
 ## Installation Instructions
 
