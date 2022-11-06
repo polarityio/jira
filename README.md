@@ -22,7 +22,7 @@ https://id.atlassian.com/manage/api-tokens
 
 ### Projects to Search
 
-A comma delimited list of project names to search. Project short names can be used in addition to the long names. Project names are not case sensitive. If no value is provided, all accessible projects will be searched.
+A comma delimited list of project names to search. Project short names can be used in addition to the long names. Project names are not case-sensitive. If no value is provided, all accessible projects will be searched. This setting does not affect searches on Jira Issue Keys and is only used for searches on other entities (e.g., IP, domain, cve, etc.).
 
 ### Retrieve and Show Issue Comments
 
