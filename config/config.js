@@ -23,24 +23,22 @@ module.exports = {
    * @type String
    * @optional
    */
-  description: 'Lookup Jira issues by issue or email',
+  description: 'Lookup Jira issues by key or search across Jira issues by IP, domain, email, hash, url, or CVE',
   customTypes: [
     {
       key: 'jira',
       regex: /[A-Z]{1,10}-\d{1,10}/
-    },
+    }
     // {
     //   key: 'possiblyDefangedUrl',
     //   regex:
     //     /(?:\w+(?:(?:\[:\]\/\/)|(?::\/\/)|(?:\[:\/\/\])))?(?:\w+\.|(?:\w+\[\.\]))+\w+(?:\/(?:[\/=\.\[\]\w&#@$%?-])*)?/
     // }
   ],
-  entityTypes: ['domain', 'email', 'IPv4', 'IPv6', 'url', 'hash'],
+  entityTypes: ['domain', 'email', 'IPv4', 'IPv6', 'url', 'hash', 'cve'],
   defaultColor: 'light-blue',
   logging: {
-    level: 'info', //trace, debug, info, warn, error, fatal
-    fileName: 'integration.log',
-    directoryPath: 'logs'
+    level: 'info' //trace, debug, info, warn, error, fatal
   },
   request: {
     // Provide the path to your certFile. Leave an empty string to ignore this option.
@@ -73,7 +71,7 @@ module.exports = {
    * @type Array
    * @optional
    */
-  styles: ['./styles/jira.less'],
+  styles: ['./styles/styles.less'],
   /**
    * Provide custom component logic and template for rendering the integration details block.  If you do not
    * provide a custom template and/or component then the integration will display data as a table of key value
@@ -84,21 +82,12 @@ module.exports = {
    */
   block: {
     component: {
-      file: './components/jira-block.js'
+      file: './components/block.js'
     },
     template: {
-      file: './templates/jira-block.hbs'
+      file: './templates/block.hbs'
     }
   },
-  summary: {
-    component: {
-      file: './components/jira-summary.js'
-    },
-    template: {
-      file: './templates/jira-summary.hbs'
-    }
-  },
-
   /**
    * Options that are displayed to the user/admin in the Polarity integration user-interface.  Should be structured
    * as an array of option objects.
@@ -109,192 +98,49 @@ module.exports = {
   options: [
     {
       key: 'baseUrl',
-      /**
-       * Human Readable name for the option which will be displayed in the Polarity user interface
-       *
-       * @property name
-       * @type String
-       */
       name: 'Jira Base URL',
-      /**
-       * A short description for what the option does.  This description is displayed in the user interface
-       *
-       * @property description
-       * @type String
-       */
-      description: 'URL used to access your instance of Jira.',
-      /**
-       * The default value for the option.  Note this value can be either a String or Boolean depending on
-       * the @type specified by the `type` property.
-       *
-       * @property default
-       * @type String|Boolean
-       */
+      description: 'URL used to access your instance of Jira. This option must be set to "Users can view only" or "Users can view and edit".',
       default: '',
-      /**
-       * The type for this option.  Can be either "string", "boolean", or "password"
-       *
-       * @property type
-       * @type String
-       */
       type: 'text',
-      /**
-       * If `true`, non-admin users can edit the value of this option and the option will be stored on a
-       * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have
-       * an effect, the property `admin-only` must be set to false.
-       *
-       * @property user-can-edit
-       * @type Boolean
-       */
-      userCanEdit: true,
-      /**
-       * If set to true, the setting can only be viewed by admins.  For all other users the setting will not appear.
-       * Note that if `admin-only` is set to true the value of `user-can-edit` is not applicable.
-       *
-       * @property admin-only
-       * @type Boolean
-       */
+      userCanEdit: false,
       adminOnly: false
     },
     {
-      /**
-       * A Unique name for the option.  Should be camelcased (lowercase first letter, uppercase letters for
-       * subsequent words).
-       *
-       * @property key
-       * @type String             *
-       */
       key: 'userName',
-      /**
-       * Human Readable name for the option which will be displayed in the Polarity user interface
-       *
-       * @property name
-       * @type String
-       */
       name: 'Jira Username',
-      /**
-       * A short description for what the option does.  This description is displayed in the user interface
-       *
-       * @property description
-       * @type String
-       */
       description: 'Username used for individual to access Jira.',
-      /**
-       * The default value for the option.  Note this value can be either a String or Boolean depending on
-       * the @type specified by the `type` property.
-       *
-       * @property default
-       * @type String|Boolean
-       */
       default: '',
-      /**
-       * The type for this option.  Can be either "string", "boolean", or "password"
-       *
-       * @property type
-       * @type String
-       */
       type: 'text',
-      /**
-       * If `true`, non-admin users can edit the value of this option and the option will be stored on a
-       * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have
-       * an effect, the property `admin-only` must be set to false.
-       *
-       * @property user-can-edit
-       * @type Boolean
-       */
-      userCanEdit: true,
-      /**
-       * If set to true, the setting can only be viewed by admins.  For all other users the setting will not appear.
-       * Note that if `admin-only` is set to true the value of `user-can-edit` is not applicable.
-       *
-       * @property admin-only
-       * @type Boolean
-       */
-      adminOnly: false
-      /**
-       * A Unique name for the option.  Should be camelcased (lowercase first letter, uppercase letters for
-       * subsequent words).
-       *
-       * @property key
-       * @type String
-       */
+      userCanEdit: false,
+      adminOnly: true
     },
     {
       key: 'apiKey',
-      /**
-       * Human Readable name for the option which will be displayed in the Polarity user interface
-       *
-       * @property name
-       * @type String
-       */
       name: 'API Token or Password',
-      /**
-       * A short description for what the option does.  This description is displayed in the user interface
-       *
-       * @property description
-       * @type String
-       */
       description: 'Jira API token (For Jira Cloud) or Jira Password (For Jira Server).',
-      /**
-       * The default value for the option.  Note this value can be either a String or Boolean depending on
-       * the @type specified by the `type` property.
-       *
-       * @property default
-       * @type String|Boolean
-       */
       default: '',
-      /**
-       * The type for this option.  Can be either "string", "boolean", or "password"
-       *
-       * @property type
-       * @type String
-       */
       type: 'password',
-      /**
-       * If `true`, non-admin users can edit the value of this option and the option will be stored on a
-       * per-user basis.  If `false`, the option will be server wide.  Note that for this setting to have
-       * an effect, the property `admin-only` must be set to false.
-       *
-       * @property user-can-edit
-       * @type Boolean
-       */
-      userCanEdit: true,
-      /**
-       * If set to true, the setting can only be viewed by admins.  For all other users the setting will not appear.
-       * Note that if `admin-only` is set to true the value of `user-can-edit` is not applicable.
-       *
-       * @property admin-only
-       * @type Boolean
-       */
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
     },
     {
-      key: 'searchIssue',
-      name: 'Jira Issue Search',
-      description: 'If checked, the integration will search keywords/phrases in Jira issues',
-      default: true,
-      type: 'boolean',
-      userCanEdit: true,
-      adminOnly: false
-    },
-    {
-      key: 'reduceSearchFuzziness',
-      name: 'Reduce Search Fuzziness',
+      key: 'projectsToSearch',
+      name: 'Projects to Search',
       description:
-        'If checked, the integration will return fewer results with an exact string match on your entities.',
-      default: true,
-      type: 'boolean',
-      userCanEdit: true,
+        'A comma delimited list of project names to search.  Project short names can be used in addition to the long names.  Project names are not case sensitive. If no value is provided, all accessible projects will be searched.',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
       adminOnly: false
     },
     {
-      key: 'searchComments',
-      name: 'Search Comments',
+      key: 'displayComments',
+      name: 'Retrieve and Show Issue Comments',
       description:
-        'If checked, the integration will search your entities in the comments.',
+        'If checked, the integration will fetch and display comments when showing search results.  Comments are always displayed when looking up an Issue by its key.  Defaults to "enabled".',
       default: true,
       type: 'boolean',
-      userCanEdit: true,
+      userCanEdit: false,
       adminOnly: false
     }
   ]

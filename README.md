@@ -2,10 +2,7 @@
 
 The Polarity Jira integration allows Polarity to search Jira to return any Issues that are contained in Jira.
 
-View the integration in action:
-
-![jira](https://user-images.githubusercontent.com/22529325/57065777-7c6f2b80-6c98-11e9-9f0a-ee09dda09a04.gif)
-
+<img width="400" alt="Jira Issue Lookup Screenshot" src="./assets/overlay.png">
 
 ## Jira Integration Options
 
@@ -23,14 +20,13 @@ Jira API token (For Jira Cloud) or Jira Password (For Jira Server).
 
 https://id.atlassian.com/manage/api-tokens
 
-### Jira Issue Search
-If checked, the integration will search keywords/phrases in Jira issues
+### Projects to Search
 
-### Reduce Search Fuzziness
-If checked, the integration will return fewer results with an exact string match on your entities.
+A comma delimited list of project names to search. Project short names can be used in addition to the long names. Project names are not case sensitive. If no value is provided, all accessible projects will be searched.
 
-### Search Comments
-If checked, the integration will search your entities in the comments.
+### Retrieve and Show Issue Comments
+
+If checked, the integration will fetch and display comments when showing search results. Comments are always displayed when looking up an Issue by its key. Defaults to "enabled".
 
 ## Installation Instructions
 

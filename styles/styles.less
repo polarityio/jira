@@ -1,0 +1,88 @@
+/*
+ All integrations are namespaced with the class `<integration_id>-integration`.  When creating custom
+ CSS to style your integration you should ensure that all your classes are appropriately namespaced to prevent
+ your css from affecting other integrations.  Note that the integration id is based off the name of the integration
+ directory.
+*/
+
+.tags {
+  margin-top: 5px;
+
+  .pulse-tag {
+    background-color: #dedede;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    padding: 3px;
+    display: inline-block;
+  }
+}
+
+.p-block {
+  word-break: break-word;
+}
+
+.text-field {
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.title-caret-icon {
+  font-size: 10px !important;
+}
+
+.external-link-icon {
+  font-size: 8px;
+  margin-bottom: 1px;
+}
+
+
+.comments-container {
+  padding-left: 10px;
+  border-left: 2px solid #dee2e6;
+
+  .comment-wrapper {
+    white-space: pre-wrap;
+    max-height: 100px;
+    overflow-y: scroll;
+    border: 1px solid #dee2e6;
+    border-radius: 3px;
+    padding: 3px;
+    width: 100%;
+    resize: vertical;
+    word-wrap: break-word;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: 12px;
+  }
+}
+
+
+.author-avatar {
+  width: 16px;
+  height: 16px;
+}
+
+.title-icon {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.summary {
+  word-wrap: break-word;
+  border: 1px solid #dee2e6;
+  padding: 3px;
+  border-radius: 3px;
+}
+
+.description {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  display: block;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #dee2e6;
+  padding: 3px;
+  border-radius: 3px;
+  resize: vertical;
+  margin-top: 3px;
+}

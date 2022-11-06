@@ -1,0 +1,190 @@
+{{#if details.jql}}
+  <div class="mb-1">
+    <a class="p-link" href="{{block.userOptions.baseUrl}}/issues/?jql={{details.jql}}">Run search in Jira {{fa-icon icon="external-link" fixedWidth=true class="external-link-icon"}}</a>
+  </div>
+{{/if}}
+
+{{#if (gt details.total 1)}}
+  {{#if (lte details.total details.maxResults)}}
+    <div>Showing all {{details.total}} results</div>
+  {{else}}
+    <div>Showing first {{details.maxResults}} of {{details.total}} total results</div>
+  {{/if}}
+{{/if}}
+
+{{#each details.issues as |issue issueIndex|}}
+  <h1 class="p-title {{unless (eq issueIndex 0) "mt-3"}}">
+    <a class="d-flex align-items-center" href="{{block.userOptions.baseUrl}}/browse/{{issue.key}}" target="_blank">
+      <img class="title-icon mr-1" src="{{get details.icons issue.fields.project.__iconMd5}}"/>
+      {{issue.fields.project.name}}
+      <span class="pl-1 pr-1">/</span>
+      <img class="title-icon mr-1" src="{{get details.icons issue.fields.issuetype.__iconMd5}}"/>
+      {{issue.key}}
+    </a>
+  </h1>
+
+  {{#if issue.fields.summary}}
+    <div class="summary mb-1">
+      {{issue.fields.summary}}
+    </div>
+  {{/if}}
+
+  {{#if issue.fields.issuetype.name}}
+    <div>
+      <span class="p-key">Issue Type:</span>
+      <span class="p-value">{{issue.fields.issuetype.name}}</span>
+    </div>
+  {{/if}}
+  {{#if issue.fields.status.name}}
+      <div>
+          <span class="p-key">Current Status:</span>
+          <span class="p-value">{{issue.fields.status.name}}</span>
+      </div>
+  {{/if}}
+  {{#if issue.fields.project.projectTypeKey}}
+    <div>
+      <span class="p-key">Project Type:</span>
+      <span class="p-value">{{issue.fields.project.projectTypeKey}}</span>
+    </div>
+  {{/if}}
+  {{#if issue.fields.priority.name}}
+      <div>
+          <span class="p-key">Priority:</span>
+          <span class="p-value">{{issue.fields.priority.name}}</span>
+      </div>
+  {{/if}}
+
+  {{#if details.fields.creator.displayName}}
+    <div>
+      <span class="p-key">Creator:</span>
+      <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.creator.accountId}}" target="_blank">{{issue.fields.creator.displayName}}</a></span>
+    </div>
+  {{/if}}
+
+  {{#if (and issue.fields.reporter.accountId issue.fields.reporter.displayName)}}
+      <div>
+          <span class="p-key">Reporter:</span>
+          <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.reporter.accountId}}" target="_blank">{{issue.fields.reporter.displayName}}</a></span>
+      </div>
+  {{/if}}
+
+  {{#if issue.fields.assignee.displayName}}
+    <div>
+      <span class="p-key">Assignee:</span>
+      <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.assignee.accountId}}" target="_blank">{{issue.fields.assignee.displayName}}</a></span>
+    </div>
+  {{/if}}
+
+  {{#if issue.fields.resolution.name}}
+    <div>
+      <span class="p-key">Issue Resolution:</span>
+      <span class="p-block">{{issue.fields.resolution.name}}</span>
+    </div>
+  {{/if}}
+
+  {{#if issue.fields.resolutiondate}}
+    <div>
+      <span class="p-key">Issue Resolution Date:</span>
+      <span class="p-value">{{moment-format issue.fields.resolutiondate "YYYY-MM-DD HH:mm:ss z" timeZone=timezone}}</span>
+    </div>
+  {{/if}}
+
+  {{#if issue.fields.created}}
+    <div>
+      <span class="p-key">Created:</span>
+      <span class="p-value">{{moment-format issue.fields.created "YYYY-MM-DD HH:mm:ss z" timeZone=timezone}}</span>
+    </div>
+  {{/if}}
+
+  {{#if issue.fields.updated}}
+    <div>
+      <span class="p-key">Updated:</span>
+      <span class="p-value">{{moment-format issue.fields.updated "YYYY-MM-DD HH:mm:ss z" timeZone=timezone}}</span>
+    </div>
+  {{/if}}
+
+  {{#if issue.fields.labels}}
+    <h1 class="p-title">
+      {{fa-icon icon="tags" fixedWidth=true}} Labels
+    </h1>
+
+    <div class="tags">
+      {{#each issue.fields.labels as |label|}}
+        <span class="pulse-tag">{{label}}</span>
+      {{/each}}
+    </div>
+  {{/if}}
+
+  {{#if issue.fields.fixVersions}}
+    <h1 class="p-title">
+      {{fa-icon "calendar"}} Fix Versions
+    </h1>
+
+    {{#each issue.fields.fixVersions as |version|}}
+      <div class="mb-2">
+      {{#if version.name}}
+        <div>
+          <span class="p-key">Version Name:</span>
+          <span class="p-value">{{version.name}}</span>
+        </div>
+      {{/if}}
+      {{#if version.releaseDate}}
+        <div>
+          <span class="p-key">Version Release Date:</span>
+          <span class="p-value">{{version.releaseDate}}</span>
+        </div>
+      {{/if}}
+      {{#if version.description}}
+        <div>
+          <span class="p-key">Version Description:</span>
+          <span class="description">{{version.description}}</span>
+        </div>
+      {{/if}}
+      </div>
+    {{/each}}
+  {{/if}}
+
+  {{#if issue.fields.description}}
+    <div class="mt-1 mb-1">
+      <span class="p-action" {{action "toggleDescription" issueIndex}}>
+        {{#if issue.__showDescription}}
+          Hide Description {{fa-icon icon="caret-up" fixedWidth=true}}
+        {{else}}
+          View Description {{fa-icon icon="caret-down" fixedWidth=true}}
+        {{/if}}
+      </span>
+      {{#if issue.__showDescription}}
+        <span class="description">{{issue.fields.description}}</span>
+      {{/if}}
+    </div>
+  {{/if}}
+
+  {{#if issue.comments}}
+    <div class="mt-1 mb-1">
+      <span class="p-action view-more" {{action "toggleComments" issueIndex}}>
+        {{#if issue.__showComments}}
+          Hide Comments {{fa-icon icon="caret-up" fixedWidth=true}}
+        {{else}}
+          View Comments ({{issue.comments.length}}) {{fa-icon icon="caret-down" fixedWidth=true}}
+        {{/if}}
+      </span>
+    </div>
+    <div class="comments-container mt-2">
+      {{#each issue.comments as |comment|}}
+        {{#if issue.__showComments}}
+          <div class="d-flex align-items-center">
+            <img class="author-avatar" src="{{comment.author.avatarUrls.24x24}}"/>
+            <div class="ml-1">{{comment.author.displayName}}</div>
+            <div class="p-footnote ml-1" title="{{comment.created}}">{{moment-from-now comment.created}}</div>
+            {{#if (not-eq comment.created comment.updated)}}
+              <div class="p-footnote ml-1" title="{{comment.updated}}">(edited)</div>
+            {{/if}}
+          </div>
+          <div class="w-100">
+            <pre class="comment-wrapper mt-1">{{comment.body}}</pre>
+          </div>
+        {{/if}}
+      {{/each}}
+    </div>
+  {{/if}}
+{{/each}}
