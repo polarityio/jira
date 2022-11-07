@@ -225,6 +225,15 @@ function _lookupEntity(entityObj, options, cb) {
         return;
       }
 
+      // 400 errors can be triggered by invalid JQL
+      if (response.statusCode === 400) {
+        cb({
+          body,
+          statusCode: response.statusCode
+        });
+        return;
+      }
+
       // If we get a 404 then cache a miss
       if (response.statusCode === 404) {
         cb(null, {
