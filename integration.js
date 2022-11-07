@@ -159,11 +159,11 @@ function getIssueSummaryTags(issue) {
 }
 
 function createJqlQuery(entities, options){
-  let jqlQuery = 'text ~ ';
+  let jqlQuery = 'text ~ "';
   for(let i=0; i<entities.length-1; i++){
     jqlQuery += `\\"${entities[i]}\\" OR `;
   }
-  jqlQuery += `\\"${entities[entities.length - 1]}\\"`;
+  jqlQuery += `\\"${entities[entities.length - 1]}\\""`;
 
   if(options.projectsToSearch.trim().length > 0){
     let quotedProjects = options.projectsToSearch.split(',').map((project) => `project="${project.trim()}"`);
@@ -213,7 +213,7 @@ function _lookupEntity(entityObj, options, cb) {
       json: true
     },
     async (err, response, body) => {
-      log.trace({ jqlQuery, body, err }, 'JQL Query and Result');
+      log.trace({ jqlQuery, body, err, status: response ? response.statusCode : 'N/A' }, 'JQL Query and Result');
 
       // check for a request error
       if (err) {
@@ -236,14 +236,6 @@ function _lookupEntity(entityObj, options, cb) {
 
       // If we get a 404 then cache a miss
       if (response.statusCode === 404) {
-        cb(null, {
-          entity: entityObj,
-          data: null // setting data to null indicates to the server that this entity lookup was a "miss"
-        });
-        return;
-      }
-
-      if (response.statusCode === 400) {
         cb(null, {
           entity: entityObj,
           data: null // setting data to null indicates to the server that this entity lookup was a "miss"
