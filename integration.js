@@ -158,14 +158,14 @@ function getIssueSummaryTags(issue) {
   return tags;
 }
 
-function createJqlQuery(entities, options){
+function createJqlQuery(entities, options) {
   let jqlQuery = 'text ~ "';
-  for(let i=0; i<entities.length-1; i++){
+  for (let i = 0; i < entities.length - 1; i++) {
     jqlQuery += `\\"${entities[i]}\\" OR `;
   }
   jqlQuery += `\\"${entities[entities.length - 1]}\\""`;
 
-  if(options.projectsToSearch.trim().length > 0){
+  if (options.projectsToSearch.trim().length > 0) {
     let quotedProjects = options.projectsToSearch.split(',').map((project) => `project="${project.trim()}"`);
     jqlQuery += ` AND (${quotedProjects.join(' OR ')})`;
   }
@@ -305,7 +305,7 @@ function computeMd5(data) {
  * @param options
  * @returns {Promise<{}>}
  */
-async function getRequiredIcons(issues, options){
+async function getRequiredIcons(issues, options) {
   // enrich with icon data as needed
   // Project Icon Path: issue.fields.project.avatarUrls.24x24
   // Issue Type Icon: issue.fields.issuetype.iconUrl
@@ -339,13 +339,9 @@ async function getRequiredIcons(issues, options){
   return requiredIcons;
 }
 
-
 async function onDetails(resultObject, options, cb) {
   try {
-    if (options.displayComments) {
-      resultObject.data.details.issues = await getCommentsAndAddToIssues(resultObject.data.details, options);
-    }
-
+    resultObject.data.details.issues = await getCommentsAndAddToIssues(resultObject.data.details, options);
     resultObject.data.details.icons = await getRequiredIcons(resultObject.data.details.issues, options);
 
     cb(null, resultObject.data);
@@ -373,7 +369,7 @@ function errorToPojo(err, detail) {
  *
  * Since icons can be different formats (PNG, SVG, GIF etc.), we use the content-type of the response header
  * to set the data type in the base64 encoded string.
- * 
+ *
  * @param iconUrl
  * @param options
  * @returns {Promise<string>}

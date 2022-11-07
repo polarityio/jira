@@ -24,10 +24,6 @@ https://id.atlassian.com/manage/api-tokens
 
 A comma delimited list of project names to search. Project short names can be used in addition to the long names. Project names are not case-sensitive. If no value is provided, all accessible projects will be searched. This setting does not affect searches on Jira Issue Keys and is only used for searches on other entities (e.g., IP, domain, cve, etc.).
 
-### Retrieve and Show Issue Comments
-
-If checked, the integration will fetch and display comments when showing search results. Comments are always displayed when looking up an Issue by its key. Defaults to "enabled".
-
 ## Installation Instructions
 
 Installation instructions for integrations are provided on the [PolarityIO GitHub Page](https://polarityio.github.io/).

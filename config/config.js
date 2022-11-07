@@ -133,16 +133,6 @@ module.exports = {
       type: 'text',
       userCanEdit: false,
       adminOnly: false
-    },
-    {
-      key: 'displayComments',
-      name: 'Retrieve and Show Issue Comments',
-      description:
-        'If checked, the integration will fetch and display comments when showing search results.  Comments are always displayed when looking up an Issue by its key.  Defaults to "enabled".',
-      default: true,
-      type: 'boolean',
-      userCanEdit: false,
-      adminOnly: false
     }
   ]
 };
