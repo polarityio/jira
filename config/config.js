@@ -99,7 +99,8 @@ module.exports = {
     {
       key: 'baseUrl',
       name: 'Jira Base URL',
-      description: 'URL used to access your instance of Jira. This option must be set to "Users can view only" or "Users can view and edit".',
+      description:
+        'URL used to access your instance of Jira. This option must be set to "Users can view only" or "Users can view and edit".',
       default: '',
       type: 'text',
       userCanEdit: false,
@@ -128,7 +129,27 @@ module.exports = {
       name: 'Projects to Search',
       description:
         'A comma delimited list of project names to search.  Project short names can be used in addition to the long names.  Project names are not case-sensitive. ' +
-          'If no value is provided, all accessible projects will be searched.  This setting does not affect searches on Jira Issue Keys and is only used for searches on other entities (e.g., IP, domain, cve, etc.).',
+        'If no value is provided, all accessible projects will be searched.  This setting does not affect searches on Jira Issue Keys and is only used for searches on other entities (e.g., IP, domain, cve, etc.).',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: false
+    },
+    {
+      key: 'ignoreList',
+      name: 'Ignored Entities List',
+      description:
+        'A comma delimited list entities you wish to ignore from search',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: false
+    },
+    {
+      key: 'ignoreListRegex',
+      name: 'Ignore Regex Entities List',
+      description:
+        'A comma delimited list regular expressions for ignoring entities from search',
       default: '',
       type: 'text',
       userCanEdit: false,
