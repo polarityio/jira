@@ -1,7 +1,7 @@
 'use strict';
 const request = require('postman-request');
 const _ = require('lodash');
-const { get, filter, flow, split, map, trim, compact, uniq, size } = require('lodash/fp');
+const { get, filter, flow, split, map, trim, compact, uniq, size, some } = require('lodash/fp');
 const async = require('async');
 const fs = require('fs');
 const config = require('./config/config');
@@ -65,7 +65,7 @@ function doLookup(entities, options, cb) {
           return !ignoreEntities.includes(entity.value) && entityNotCaughtByRegex;
         }, entities)
       : entities;
-      
+
   log.trace({ entities, entitiesWithoutIgnored }, 'doLookup');
 
 
