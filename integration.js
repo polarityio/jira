@@ -1,7 +1,7 @@
 'use strict';
 const request = require('postman-request');
 const _ = require('lodash');
-const { get } = require('lodash/fp');
+const { get, filter, flow, split, map, trim, compact, uniq, size, some } = require('lodash/fp');
 const async = require('async');
 const fs = require('fs');
 const config = require('./config/config');
@@ -47,13 +47,31 @@ function startup(logger) {
     });
 }
 
+const splitCommaSeparatedUserOption = (key, options) => flow(get(key), split(','), map(trim), compact, uniq)(options);
+
 function doLookup(entities, options, cb) {
   let lookupIssues = [];
 
-  log.trace({ entities }, 'doLookup');
+  const ignoreEntities = splitCommaSeparatedUserOption('ignoreList', options);
+  const ignoreEntitiesRegex = splitCommaSeparatedUserOption('ignoreListRegex', options);
+  const entitiesWithoutIgnored =
+    size(ignoreEntities) || size(ignoreEntitiesRegex)
+      ? filter((entity) => {
+          const entityNotCaughtByRegex = !some((regexStr) => {
+            try {
+              return entity.value.match(new RegExp(regexStr, 'i'));
+            } catch (_) {
+              return false;
+            }
+          }, ignoreEntitiesRegex);
+          return !ignoreEntities.includes(entity.value) && entityNotCaughtByRegex;
+        }, entities)
+      : entities;
+
+  log.trace({ entities, entitiesWithoutIgnored }, 'doLookup');
 
   async.each(
-    entities,
+    entitiesWithoutIgnored,
     function (entityObj, next) {
       const queryFunction =
         entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0 ? _lookupEntityIssue : _lookupEntity;
