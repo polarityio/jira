@@ -47,8 +47,7 @@ function startup(logger) {
     });
 }
 
-const splitCommaSeparatedUserOption = (key, options) =>
-  flow(get(key), split(','), map(trim), compact, uniq)(options)
+const splitCommaSeparatedUserOption = (key, options) => flow(get(key), split(','), map(trim), compact, uniq)(options);
 
 function doLookup(entities, options, cb) {
   let lookupIssues = [];
@@ -58,16 +57,18 @@ function doLookup(entities, options, cb) {
   const entitiesWithoutIgnored =
     size(ignoreEntities) || size(ignoreEntitiesRegex)
       ? filter((entity) => {
-          const entityNotCaughtByRegex = !some(
-            (regexStr) => entity.value.match(new RegExp(regexStr, 'i')),
-            ignoreEntitiesRegex
-          );
+          const entityNotCaughtByRegex = !some((regexStr) => {
+            try {
+              return entity.value.match(new RegExp(regexStr, 'i'));
+            } catch (_) {
+              return false;
+            }
+          }, ignoreEntitiesRegex);
           return !ignoreEntities.includes(entity.value) && entityNotCaughtByRegex;
         }, entities)
       : entities;
 
   log.trace({ entities, entitiesWithoutIgnored }, 'doLookup');
-
 
   async.each(
     entitiesWithoutIgnored,
