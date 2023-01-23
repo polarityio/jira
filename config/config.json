@@ -1,0 +1,99 @@
+{
+  "name": "Jira",
+  "acronym": "JIRA",
+  "description": "Lookup Jira issues by key or search across Jira issues by IP, domain, email, hash, url, or CVE",
+  "customTypes": [
+    {
+      "key": "jira",
+      "regex": "[A-Z]{1,10}-\\d{1,10}"
+    }
+  ],
+  "entityTypes": [
+    "domain",
+    "email",
+    "IPv4",
+    "IPv6",
+    "url",
+    "hash",
+    "cve"
+  ],
+  "defaultColor": "light-blue",
+  "logging": {
+    "level": "info"
+  },
+  "request": {
+    "cert": "",
+    "key": "",
+    "passphrase": "",
+    "ca": "",
+    "proxy": "",
+    "rejectUnauthorized": true
+  },
+  "styles": [
+    "./styles/styles.less"
+  ],
+  "block": {
+    "component": {
+      "file": "./components/block.js"
+    },
+    "template": {
+      "file": "./templates/block.hbs"
+    }
+  },
+  "options": [
+    {
+      "key": "baseUrl",
+      "name": "Jira Base URL",
+      "description": "URL used to access your instance of Jira. This option must be set to \"Users can view only\" or \"Users can view and edit\".",
+      "default": "",
+      "type": "text",
+      "userCanEdit": false,
+      "adminOnly": false
+    },
+    {
+      "key": "userName",
+      "name": "Jira Username",
+      "description": "Username used for individual to access Jira.",
+      "default": "",
+      "type": "text",
+      "userCanEdit": false,
+      "adminOnly": true
+    },
+    {
+      "key": "apiKey",
+      "name": "API Token or Password",
+      "description": "Jira API token (For Jira Cloud) or Jira Password (For Jira Server).",
+      "default": "",
+      "type": "password",
+      "userCanEdit": false,
+      "adminOnly": true
+    },
+    {
+      "key": "projectsToSearch",
+      "name": "Projects to Search",
+      "description": "A comma delimited list of project names to search.  Project short names can be used in addition to the long names.  Project names are not case-sensitive. If no value is provided, all accessible projects will be searched.  This setting does not affect searches on Jira Issue Keys and is only used for searches on other entities (e.g., IP, domain, cve, etc.).",
+      "default": "",
+      "type": "text",
+      "userCanEdit": false,
+      "adminOnly": false
+    },
+    {
+      "key": "ignoreList",
+      "name": "Ignored Entities List",
+      "description": "A comma delimited list entities you wish to ignore from search",
+      "default": "",
+      "type": "text",
+      "userCanEdit": false,
+      "adminOnly": false
+    },
+    {
+      "key": "ignoreListRegex",
+      "name": "Ignore Regex Entities List",
+      "description": "A comma delimited list regular expressions for ignoring entities from search",
+      "default": "",
+      "type": "text",
+      "userCanEdit": false,
+      "adminOnly": false
+    }
+  ]
+}
