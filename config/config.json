@@ -1,4 +1,5 @@
 {
+  "polarityIntegrationUuid": "c6a03750-cce1-11ed-aeee-075d3490155d",
   "name": "Jira",
   "acronym": "JIRA",
   "description": "Lookup Jira issues by key or search across Jira issues by IP, domain, email, hash, url, or CVE",
