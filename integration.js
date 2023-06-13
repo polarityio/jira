@@ -403,7 +403,7 @@ async function getIcon(iconUrl, options) {
     },
     encoding: null
   });
-  log.info({ response }, 'getIcon Response');
+
   return `data:${response.headers['content-type']};base64,${Buffer.from(response.body, 'binary').toString('base64')}`;
 }
 
