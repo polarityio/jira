@@ -42,7 +42,7 @@ function startup(logger) {
     new Promise((resolve, reject) => {
       requestWithDefaults(requestOptions, (err, res, body) => {
         if (err) return reject(err);
-        resolve({ ...res, body });
+        resolve(res);
       });
     });
 }
@@ -403,6 +403,7 @@ async function getIcon(iconUrl, options) {
     },
     encoding: null
   });
+
   return `data:${response.headers['content-type']};base64,${Buffer.from(response.body, 'binary').toString('base64')}`;
 }
 
