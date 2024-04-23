@@ -103,7 +103,7 @@ module.exports = {
     {
       key: 'userName',
       name: 'Jira Username',
-      description: 'Username used for individual to access Jira.',
+      description: 'Username used for individual to access Jira.  Only required when authenticating to Jira Cloud.',
       default: '',
       type: 'text',
       userCanEdit: false,
@@ -111,8 +111,8 @@ module.exports = {
     },
     {
       key: 'apiKey',
-      name: 'API Token or Password',
-      description: 'Jira API token (For Jira Cloud) or Jira Password (For Jira Server).',
+      name: 'API Token',
+      description: 'Jira API token.  Required for both Jira Cloud and Jira Server.',
       default: '',
       type: 'password',
       userCanEdit: false,
