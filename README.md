@@ -2,7 +2,13 @@
 
 The Polarity Jira integration allows Polarity to search Jira to return any Issues that are contained in Jira.
 
+The integration supports Jira Cloud as well as Jira Server v8.16+
+
 <img width="400" alt="Jira Issue Lookup Screenshot" src="./assets/overlay.png">
+
+## Authentication
+
+If you are authenticating to Jira Server v8.16+ then you should only provide an API Token.  For user's authenticating to Jira Cloud, a username and corresponding API token for that user are required.
 
 ## Jira Integration Options
 
@@ -12,11 +18,11 @@ URL used to access your instance of Jira.
 
 ### Jira UserName
 
-Username used for individual to access Jira.
+Username used for individual to access Jira.  The Username is not required if you are authenticating to Jira Server.  Jira Server authentication is done via API Token only.
 
 ### API Token or Password
 
-Jira API token (For Jira Cloud) or Jira Password (For Jira Server).
+Jira API token.  Required for both Jira Cloud and Jira Server.
 
 https://id.atlassian.com/manage/api-tokens
 

@@ -89,6 +89,25 @@ function doLookup(entities, options, cb) {
   );
 }
 
+function getAuthHeaders(options) {
+  if (options.userName && options.apiKey) {
+    // If a userName and apiKey are provided then we are authenticating to Jira Cloud
+    return {
+      auth: {
+        username: options.userName,
+        password: options.apiKey
+      }
+    };
+  } else if (options.apiKey) {
+    // if just an apiKey is provided then we are authenticating to Jira Server
+    return {
+      headers: {
+        Authorization: `Bearer ${options.apiKey}`
+      }
+    };
+  }
+}
+
 function _lookupEntityIssue(entityObj, options, cb) {
   let uri = options.baseUrl + '/rest/api/2/issue/' + entityObj.value;
   requestWithDefaults(
@@ -96,11 +115,8 @@ function _lookupEntityIssue(entityObj, options, cb) {
       uri: uri,
       method: 'GET',
       followAllRedirects: true,
-      auth: {
-        username: options.userName,
-        password: options.apiKey
-      },
-      json: true
+      json: true,
+      ...getAuthHeaders(options)
     },
     function (err, response, body) {
       // check for a request error
@@ -224,11 +240,8 @@ function _lookupEntity(entityObj, options, cb) {
       uri: `${options.baseUrl}/rest/api/2/search`,
       qs: { jql: jqlQuery },
       followAllRedirects: true,
-      auth: {
-        username: options.userName,
-        password: options.apiKey
-      },
-      json: true
+      json: true,
+      ...getAuthHeaders(options)
     },
     async (err, response, body) => {
       log.trace({ jqlQuery, body, err, status: response ? response.statusCode : 'N/A' }, 'JQL Query and Result');
@@ -397,11 +410,8 @@ async function getIcon(iconUrl, options) {
     method: 'GET',
     uri: iconUrl,
     followAllRedirects: true,
-    auth: {
-      username: options.userName,
-      password: options.apiKey
-    },
-    encoding: null
+    encoding: null,
+    ...getAuthHeaders(options)
   });
 
   return `data:${response.headers['content-type']};base64,${Buffer.from(response.body, 'binary').toString('base64')}`;
@@ -415,11 +425,8 @@ const getCommentsAndAddToIssues = async (body, options) => {
       method: 'GET',
       uri: `${options.baseUrl}/rest/api/2/issue/${issue.id}/comment`,
       followAllRedirects: true,
-      auth: {
-        username: options.userName,
-        password: options.apiKey
-      },
-      json: true
+      json: true,
+      ...getAuthHeaders(options)
     });
     issue.comments = result.body.comments;
   });
@@ -437,16 +444,6 @@ function validateOptions(userOptions, cb) {
     errors.push({
       key: 'apiKey',
       message: 'You must provide your Jira API key or Password'
-    });
-  }
-
-  if (
-    typeof userOptions.userName.value !== 'string' ||
-    (typeof userOptions.userName.value === 'string' && userOptions.userName.value.length === 0)
-  ) {
-    errors.push({
-      key: 'userName',
-      message: 'You must provide a username'
     });
   }
 
