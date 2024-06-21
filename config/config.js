@@ -35,7 +35,7 @@ module.exports = {
     //     /(?:\w+(?:(?:\[:\]\/\/)|(?::\/\/)|(?:\[:\/\/\])))?(?:\w+\.|(?:\w+\[\.\]))+\w+(?:\/(?:[\/=\.\[\]\w&#@$%?-])*)?/
     // }
   ],
-  entityTypes: ['domain', 'email', 'IPv4', 'IPv6', 'url', 'hash', 'cve'],
+  entityTypes: ['domain', 'email', 'IPv4', 'IPv6', 'url', 'MD5', 'SHA1', 'SHA256', 'cve'],
   defaultColor: 'light-blue',
   logging: {
     level: 'info' //trace, debug, info, warn, error, fatal

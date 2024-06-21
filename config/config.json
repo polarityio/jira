@@ -15,7 +15,9 @@
     "IPv4",
     "IPv6",
     "url",
-    "hash",
+    "MD5",
+    "SHA1",
+    "SHA256",
     "cve"
   ],
   "defaultColor": "light-blue",
