@@ -453,7 +453,25 @@ function validateOptions(userOptions, cb) {
   ) {
     errors.push({
       key: 'baseUrl',
-      message: 'You must provide a Jira base URL'
+      message: 'You must provide a Jira API URL'
+    });
+  }
+
+  if (
+      (typeof userOptions.baseUrl.value === 'string' && userOptions.baseUrl.value.endsWith('/'))
+  ) {
+    errors.push({
+      key: 'baseUrl',
+      message: 'Jira API URL cannot end with a trailing slash ("/")'
+    });
+  }
+
+  if (
+      (typeof userOptions.baseAppUrl.value === 'string' && userOptions.baseAppUrl.value.endsWith('/'))
+  ) {
+    errors.push({
+      key: 'baseAppUrl',
+      message: 'Jira Application URL cannot end with a trailing slash ("/")'
     });
   }
 
