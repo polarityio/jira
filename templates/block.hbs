@@ -1,6 +1,6 @@
 {{#if details.jql}}
   <div class="mb-1">
-    <a class="p-link" href="{{block.userOptions.baseUrl}}/issues/?jql={{details.jql}}">Run search in Jira {{fa-icon icon="external-link" fixedWidth=true class="external-link-icon"}}</a>
+    <a class="p-link" href="{{jiraFqdn}}/issues/?jql={{details.jql}}">Run search in Jira {{fa-icon icon="external-link" fixedWidth=true class="external-link-icon"}}</a>
   </div>
 {{/if}}
 
@@ -14,7 +14,7 @@
 
 {{#each details.issues as |issue issueIndex|}}
   <h1 class="p-title {{unless (eq issueIndex 0) "mt-3"}}">
-    <a class="d-flex align-items-center" href="{{block.userOptions.baseUrl}}/browse/{{issue.key}}" target="_blank">
+    <a class="d-flex align-items-center" href="{{jiraFqdn}}/browse/{{issue.key}}" target="_blank">
       <img class="title-icon mr-1" src="{{get details.icons issue.fields.project.__iconMd5}}"/>
       {{issue.fields.project.name}}
       <span class="pl-1 pr-1">/</span>
@@ -57,21 +57,21 @@
   {{#if details.fields.creator.displayName}}
     <div>
       <span class="p-key">Creator:</span>
-      <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.creator.accountId}}" target="_blank">{{issue.fields.creator.displayName}}</a></span>
+      <span class="p-value"><a href="{{jiraFqdn}}/people/{{issue.fields.creator.accountId}}" target="_blank">{{issue.fields.creator.displayName}}</a></span>
     </div>
   {{/if}}
 
   {{#if (and issue.fields.reporter.accountId issue.fields.reporter.displayName)}}
       <div>
           <span class="p-key">Reporter:</span>
-          <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.reporter.accountId}}" target="_blank">{{issue.fields.reporter.displayName}}</a></span>
+          <span class="p-value"><a href="{{jiraFqdn}}/people/{{issue.fields.reporter.accountId}}" target="_blank">{{issue.fields.reporter.displayName}}</a></span>
       </div>
   {{/if}}
 
   {{#if issue.fields.assignee.displayName}}
     <div>
       <span class="p-key">Assignee:</span>
-      <span class="p-value"><a href="{{block.userOptions.baseUrl}}/people/{{issue.fields.assignee.accountId}}" target="_blank">{{issue.fields.assignee.displayName}}</a></span>
+      <span class="p-value"><a href="{{jiraFqdn}}/people/{{issue.fields.assignee.accountId}}" target="_blank">{{issue.fields.assignee.displayName}}</a></span>
     </div>
   {{/if}}
 
