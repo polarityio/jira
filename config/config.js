@@ -55,7 +55,7 @@ module.exports = {
     ca: '',
     // An HTTP proxy to be used. Supports proxy Auth with Basic Auth, identical to support for
     // the url parameter (by embedding the auth info in the uri)
-    proxy: ""
+    proxy: ''
   },
 
   /**
@@ -92,9 +92,19 @@ module.exports = {
   options: [
     {
       key: 'baseUrl',
-      name: 'Jira Base URL',
+      name: 'Jira API URL',
       description:
-        'URL used to access your instance of Jira. This option must be set to "Users can view only" or "Users can view and edit".',
+        'URL used to access the REST API of your Jira instance. For Jira Cloud this will typically be `https://<your-jira-instance>.atlassian.net`. This option must be set to "Users can view only" or "Users can view and edit".  ',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: false
+    },
+    {
+      key: 'baseAppUrl',
+      name: 'Jira Application URL',
+      description:
+        'URL used to access your Jira web application instance. Leave blank if your Application URL is the same as your API URL.  Jira Cloud users can leave this option blank. This option must be set to "Users can view only" or "Users can view and edit".',
       default: '',
       type: 'text',
       userCanEdit: false,
@@ -102,8 +112,8 @@ module.exports = {
     },
     {
       key: 'userName',
-      name: 'Jira Username',
-      description: 'Username used for individual to access Jira.  Only required when authenticating to Jira Cloud.',
+      name: 'Jira Email Address',
+      description: 'Email address used for individual to access Jira.  Only required when authenticating to Jira Cloud.',
       default: '',
       type: 'text',
       userCanEdit: false,
@@ -132,8 +142,7 @@ module.exports = {
     {
       key: 'ignoreList',
       name: 'Ignored Entities List',
-      description:
-        'A comma delimited list entities you wish to ignore from search',
+      description: 'A comma delimited list entities you wish to ignore from search',
       default: '',
       type: 'text',
       userCanEdit: false,
@@ -142,8 +151,7 @@ module.exports = {
     {
       key: 'ignoreListRegex',
       name: 'Ignore Regex Entities List',
-      description:
-        'A comma delimited list regular expressions for ignoring entities from search',
+      description: 'A comma delimited list regular expressions for ignoring entities from search',
       default: '',
       type: 'text',
       userCanEdit: false,
