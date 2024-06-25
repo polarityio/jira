@@ -46,7 +46,7 @@
     {
       "key": "baseUrl",
       "name": "Jira API URL",
-      "description": "URL used to access the REST API of your Jira instance. For Jira Cloud this will typically be `https://<your-jira-instance>.atlassian.net`. This option must be set to \"Users can view only\" or \"Users can view and edit\".  ",
+      "description": "URL used to access the REST API of your Jira instance. For Jira Cloud this will typically be `https://<your-jira-instance>.atlassian.net`. This option must be set to \"Lock and show option for all users\" or \"User provides option value\".  ",
       "default": "",
       "type": "text",
       "userCanEdit": false,
@@ -55,7 +55,7 @@
     {
       "key": "baseAppUrl",
       "name": "Jira Application URL",
-      "description": "URL used to access your Jira web application instance. Leave blank if your Application URL is the same as your API URL.  Jira Cloud users can leave this option blank. This option must be set to \"Users can view only\" or \"Users can view and edit\".",
+      "description": "URL used to access your Jira web application instance. Leave blank if your Application URL is the same as your API URL.  Jira Cloud users can leave this option blank. This option must be set to \"Lock and show option for all users\" or \"User provides option value\".",
       "default": "",
       "type": "text",
       "userCanEdit": false,
