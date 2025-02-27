@@ -5,8 +5,8 @@
   "description": "Jira Issue Search",
   "private": true,
   "dependencies": {
-    "async": "^3.2.5",
+    "async": "^3.2.6",
     "lodash": "^4.17.21",
-    "postman-request": "^2.88.1-postman.34"
+    "postman-request": "^2.88.1-postman.42"
   }
 }
