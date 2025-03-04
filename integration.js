@@ -60,6 +60,7 @@ async function doLookup(entities, options, cb) {
     return cb(error);
   }
 
+  log.trace({ lookupResults }, 'doLookup results');
   cb(null, lookupResults);
 }
 

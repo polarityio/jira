@@ -54,7 +54,7 @@ async function searchIssues(entity, options) {
   if (apiResponse.statusCode === 404) {
     return null;
   } else {
-    apiResponse.jql = jqlQuery;
+    apiResponse.body.jql = jqlQuery;
     if (Array.isArray(apiResponse.body.issues)) {
       apiResponse.body.issues.forEach((issue, index) => {
         issue.__index = ++index;
