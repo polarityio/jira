@@ -17,6 +17,17 @@
   }
 }
 
+.issue-container {
+  border: 1px solid #e4e9f2;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  padding: 5px;
+
+  &:last-child {
+    margin-bottom: 0px;
+  }
+}
+
 .p-block {
   word-break: break-word;
 }
@@ -35,23 +46,89 @@
   margin-bottom: 1px;
 }
 
+.jira-html {
+  ul, ol {
+    padding-left: 5px;
+    list-style-position: inside;
+  }
 
-.comments-container {
-  padding-left: 10px;
-  border-left: 2px solid #dee2e6;
+  pre {
+    background-color: #eee;
+    padding: 5px;
+  }
 
-  .comment-wrapper {
-    white-space: pre-wrap;
-    max-height: 100px;
-    overflow-y: scroll;
-    border: 1px solid #dee2e6;
-    border-radius: 3px;
-    padding: 3px;
-    width: 100%;
-    resize: vertical;
-    word-wrap: break-word;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  blockquote {
+    border-left: 2px solid #eee;
+    padding-left: 5px;
+    margin: 0;
+  }
+
+  p {
+    margin-bottom: 5px;
+  }
+
+
+  table {
     font-size: 12px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 500px;
+    margin-bottom: 10px;
+    line-height: 1em;
+
+    th {
+      //display: none;
+      padding: 5px;
+
+      b {
+        font-weight: 500;
+      }
+    }
+
+    tbody {
+      td {
+        border-bottom: 1px solid rgb(217, 217, 217);
+      }
+
+      tr:nth-child(odd) {
+        background-color: #fff;
+      }
+
+      tr:last-child {
+        td {
+          border-bottom: none;
+        }
+      }
+
+      td:first-child {
+        min-width: 35%;
+        width: 35%;
+      }
+    }
+  }
+}
+
+
+.comment-container {
+  overflow-y: scroll;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+  padding: 3px;
+  width: 100%;
+  resize: vertical;
+  word-wrap: break-word;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 12px;
+  margin-bottom: 10px;
+  max-height: 200px;
+  padding-right: 5px;
+
+  &[style*="height"] {
+    max-height: unset;
+  }
+
+  &:last-child {
+    margin-bottom: 0px;
   }
 }
 
@@ -62,9 +139,14 @@
 }
 
 .title-icon {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 2px;
+}
+
+.user-avatar-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .summary {
@@ -75,14 +157,45 @@
 }
 
 .description {
-  white-space: pre-wrap;
   word-wrap: break-word;
   display: block;
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid #dee2e6;
-  padding: 3px;
-  border-radius: 3px;
   resize: vertical;
   margin-top: 3px;
+  padding-right: 5px;
+
+  &[style*="height"] {
+    max-height: unset;
+  }
 }
+
+/* Beginning of Paging Styles */
+.paging-bar {
+  display: flex;
+  align-items: center;
+  padding: 5px 0px 5px 0px;
+  justify-content: space-between;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+
+  .paging-bar-title {
+    font-weight: 500;
+  }
+
+  .paging-info {
+    margin: 0px 5px;
+  }
+
+  .paging-btn {
+    border: 1px solid #e4e9f2;
+    height: 20px;
+    padding: 0px 8px 0px 8px;
+
+    &:hover:enabled {
+      background-color: darken(#e4e9f2, 5%);
+    }
+  }
+}
+/* End of Paging Styles */
