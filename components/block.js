@@ -88,8 +88,48 @@ polarity.export = PolarityComponent.extend({
       this.set('currentPage', totalPages);
     },
     // End Paging Actions
-    toggleDescription(issueIndex) {
-      this.toggleProperty(`details.issues.${issueIndex}.__showDescription`);
+    updateIssueTransition(issueIndex, issueId, transitionId) {
+      const transitionName = this.get(`pagedPagingData.${issueIndex}.transitions`).find(
+        (transition) => transition.id === transitionId
+      ).name;
+      const payload = {
+        action: 'UPDATE_TRANSITION',
+        issueId,
+        transitionId
+      };
+
+      this.set(`pagedPagingData.${issueIndex}.__updating`, true);
+      this.sendIntegrationMessage(payload)
+        .then((result) => {
+          this.flashMessage(issueIndex, `Status successfully updated to "${transitionName}"`, 'success');
+          this.set(`pagedPagingData.${issueIndex}.fields.status`, result.status);
+        })
+        .catch((err) => {
+          console.error(err);
+          this.flashMessage(issueIndex, `Failed to update status`, 'error');
+        })
+        .finally(() => {
+          this.set(`pagedPagingData.${issueIndex}.__updating`, false);
+        });
+    },
+    clearFlashMessage(issueIndex) {
+      this.set(`pagedPagingData.${issueIndex}.__flashMessage`, '');
     }
+  },
+  /**
+   * Flash a message on the screen for a specific issue
+   * @param issueIndex the paged index (i.e., index of the currently displayed issues)
+   * @param message
+   * @param type 'info', 'error', or 'success'
+   */
+  flashMessage(issueIndex, message, type = 'info') {
+    this.set(`pagedPagingData.${issueIndex}.__flashMessage`, message);
+    this.set(`pagedPagingData.${issueIndex}.__flashMessageType`, type);
+
+    setTimeout(() => {
+      if (!this.isDestroyed) {
+        this.set(`pagedPagingData.${issueIndex}.__flashMessage`, '');
+      }
+    }, 2000);
   }
 });

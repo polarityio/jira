@@ -28,7 +28,9 @@ async function searchIssues(entity, options) {
     uri: `${options.baseUrl}/rest/api/3/search`,
     qs: {
       jql: jqlQuery,
-      expand: 'renderedFields',
+      expand: 'renderedFields,transitions',
+      // We fetch comments in onDetails because we need to use the comment endpoint to get
+      // the renderedHTML
       fields: '-comment'
     },
     followAllRedirects: true

@@ -14,14 +14,15 @@ const SUCCESS_CODES = [200, 404];
  * @param options
  * @returns {Promise<{issues: *[]}|null>}
  */
-async function getIssueById(entity, options) {
+async function getIssueById(issueId, options) {
   const Logger = getLogger();
 
   const requestOptions = {
-    resultId: entity,
-    uri: `${options.baseUrl}/rest/api/3/issue/${entity.value}`,
+    uri: `${options.baseUrl}/rest/api/3/issue/${issueId}`,
     qs: {
-      expand: 'renderedFields',
+      expand: 'renderedFields,transitions',
+      // We fetch comments in onDetails because we need to use the comment endpoint to get
+      // the renderedHTML
       fields: '-comment'
     },
     followAllRedirects: true
@@ -31,7 +32,7 @@ async function getIssueById(entity, options) {
 
   const apiResponse = await polarityRequest.request(requestOptions, options);
 
-  Logger.trace({ apiResponse }, `Get Jira Issue ${entity.value}`);
+  Logger.trace({ apiResponse }, `Get Jira Issue ${issueId}`);
 
   if (!SUCCESS_CODES.includes(apiResponse.statusCode)) {
     throw new ApiRequestError(

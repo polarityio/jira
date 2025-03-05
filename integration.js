@@ -3,14 +3,28 @@ const _ = require('lodash');
 const { get, filter, flow, split, map, trim, compact, uniq, size, some } = require('lodash/fp');
 const async = require('async');
 const crypto = require('crypto');
+const { getStatusesForProject } = require('./src/get-statuses-for-project');
 const { getIssueById } = require('./src/get-issue-by-id');
 const { searchIssues } = require('./src/search-issues');
 const { createResultObject } = require('./src/create-result-object');
 const { getCommentsByIssueId } = require('./src/get-comments-by-issue-id');
 const { downloadIconByUrl } = require('./src/download-icon-by-url');
+const { updateIssueTransition } = require('./src/update-issue-transition');
 const { setLogger } = require('./src/logger');
 
 let log = null;
+// Contains valid statuses for each project and issue type
+// {
+//   "projectId": {
+//     "issueType": [
+//       {
+//         // status object
+//       }
+//     ]
+//   }
+// }
+//
+const issueStatusCache = {};
 
 // Project and Task icons require authentication to display so we fetch them and store them here
 // This way we only fetch the icon the first time we see it.  The cache is keyed on the URL of the
@@ -26,7 +40,6 @@ const splitCommaSeparatedUserOption = (key, options) => flow(get(key), split(','
 
 async function doLookup(entities, options, cb) {
   let lookupResults = [];
-
   const ignoreEntities = splitCommaSeparatedUserOption('ignoreList', options);
   const ignoreEntitiesRegex = splitCommaSeparatedUserOption('ignoreListRegex', options);
   const entitiesWithoutIgnored =
@@ -49,10 +62,18 @@ async function doLookup(entities, options, cb) {
     await async.each(entitiesWithoutIgnored, async (entityObj, next) => {
       let apiResponse;
       if (entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0) {
-        apiResponse = await getIssueById(entityObj, options);
+        apiResponse = await getIssueById(entityObj.value, options);
       } else {
         apiResponse = await searchIssues(entityObj, options);
       }
+
+      // Currently not using as we need to fetch transitions on a per-issue basis but we
+      // do this in onDetails
+      // if (Array.isArray(apiResponse.issues)) {
+      //   await async.eachLimit(apiResponse.issues, 5, async (issue) => {
+      //     issue.__statuses = await getValidStatuses(issue, options);
+      //   });
+      // }
 
       lookupResults.push(createResultObject(entityObj, apiResponse, options));
     });
@@ -66,6 +87,41 @@ async function doLookup(entities, options, cb) {
 
 function computeMd5(data) {
   return crypto.createHash('md5').update(data).digest('hex');
+}
+
+/**
+ * Returns valid statuses for the given issue.  Attempts to get the statuses out of the cache.
+ * If not available in the cache, the statuses will be loaded via REST, stored in the cache,
+ * and then returned.
+ *
+ * In Jira, each issue type within a project has its own set of unique statuses.
+ *
+ * @param issue
+ * @param options
+ * @returns {Promise<*>}
+ */
+async function getValidStatuses(issue, options) {
+  const projectId = _.get(issue, 'fields.project.id', null);
+  const issueId = _.get(issue, 'fields.issuetype.id', null);
+
+  if (projectId && issueId) {
+    if (!issueStatusCache[projectId]) {
+      issueStatusCache[projectId] = {};
+    }
+
+    if (issueStatusCache[projectId][issueId]) {
+      log.trace({ statuses: issueStatusCache[projectId][issueId] }, 'Fetching issue statuses from cache');
+      return issueStatusCache[projectId][issueId];
+    }
+
+    const body = await getStatusesForProject(projectId, options);
+
+    body.forEach((issueType) => {
+      issueStatusCache[projectId][issueType.id] = issueType.statuses;
+    });
+
+    return issueStatusCache[projectId][issueId];
+  }
 }
 
 /**
@@ -157,6 +213,29 @@ async function getCommentsAndAddToIssues(issues, options) {
   return issues;
 }
 
+async function onMessage(payload, options, cb) {
+  log.trace({ payload }, 'onMessage');
+  switch (payload.action) {
+    case 'UPDATE_TRANSITION':
+      try {
+        await updateIssueTransition(payload.issueId, payload.transitionId, options);
+        const body = await getIssueById(payload.issueId, options);
+        const status = body.issues[0].fields.status;
+        cb(null, {
+          status
+        });
+      } catch (e) {
+        log.error(e, 'Error updating transitions');
+        cb(errorToPojo(e, 'Error fetching transitions'));
+      }
+      break;
+    default:
+      cb({
+        error: 'Invalid Action Provided'
+      });
+  }
+}
+
 function validateOptions(userOptions, cb) {
   let errors = [];
   if (
@@ -200,5 +279,6 @@ module.exports = {
   doLookup,
   startup,
   validateOptions,
-  onDetails
+  onDetails,
+  onMessage
 };

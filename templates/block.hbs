@@ -26,43 +26,65 @@
 
 {{#each pagedPagingData as |issue issueIndex|}}
   <div class="issue-container">
-    <h1 class="p-title mt-0">
-      {{#if (gt details.issues.length 1)}}
-        <span class="mr-1">#{{issue.__index}}</span>
-      {{/if}}
-      <a class="d-flex align-items-center" href="{{jiraFqdn}}/browse/{{issue.key}}" target="_blank">
-        {{#if state.isDetailsLoading}}
-          {{fa-icon icon="spinner-third" fixedWidth=true spin=true class=title-icon}}
-        {{else}}
-          <img class="title-icon mr-1" src="{{get details.icons issue.fields.project.__iconMd5}}"/>  
-        {{/if}}        
-        {{issue.fields.project.name}}
-        <span class="pl-1 pr-1">/</span>
-        {{#if state.isDetailsLoading}}
-          {{fa-icon icon="spinner-third" fixedWidth=true spin=true class=title-icon}}
-        {{else}}
-          <img class="title-icon mr-1" src="{{get details.icons issue.fields.issuetype.__iconMd5}}"/>
+    <div class="d-flex align-items-center justify-content-between">
+      <h1 class="p-title mt-0">
+        {{#if (gt details.issues.length 1)}}
+          <span class="mr-1">#{{issue.__index}}</span>
         {{/if}}
-        {{issue.key}}
-      </a>
-    </h1>
+        <a class="d-flex align-items-center" href="{{jiraFqdn}}/browse/{{issue.key}}" target="_blank">
+          {{#if state.isDetailsLoading}}
+            {{fa-icon icon="spinner-third" fixedWidth=true spin=true class=title-icon}}
+          {{else}}
+            <img class="title-icon mr-1" src="{{get details.icons issue.fields.project.__iconMd5}}"/>  
+          {{/if}}        
+          {{issue.fields.project.name}}
+          <span class="pl-1 pr-1">/</span>
+          {{#if state.isDetailsLoading}}
+            {{fa-icon icon="spinner-third" fixedWidth=true spin=true class=title-icon}}
+          {{else}}
+            <img class="title-icon mr-1" src="{{get details.icons issue.fields.issuetype.__iconMd5}}"/>
+          {{/if}}
+          {{issue.key}}
+        </a>
+      </h1>
+      {{#if issue.__updating}}
+        {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
+      {{/if}}
+    </div>
   
     {{#if issue.fields.summary}}
       <h1 class="p-title">
         {{issue.fields.summary}}
       </h1>
     {{/if}}
-  
+    
+    {{#if issue.fields.status.name}}
+      {{#if block.userOptions.enableUpdatingStatus}}
+        <div class="status-select mb-1">
+          <div class="label p-key">
+            <div class="p-1">
+              Status
+            </div>
+          </div>
+          <select disabled={{if (or issue.__updating state.isDetailsLoading) true}} onchange={{action (action "updateIssueTransition" issueIndex issue.id) value="target.value"}}>
+            {{#each issue.transitions as | transition |}}
+              <option value="{{transition.id}}" selected={{eq transition.to.id issue.fields.status.id}}>
+                {{transition.name}}
+              </option>            
+            {{/each}}
+          </select>          
+        </div>
+      {{else}}
+        <div>
+          <span class="p-key">Current Status:</span>
+          <span class="p-value">{{issue.fields.status.name}}</span>
+        </div>
+      {{/if}}      
+    {{/if}}
     {{#if issue.fields.issuetype.name}}
       <div>
         <span class="p-key">Issue Type:</span>
         <span class="p-value">{{issue.fields.issuetype.name}}</span>
-      </div>
-    {{/if}}
-    {{#if issue.fields.status.name}}
-      <div>
-        <span class="p-key">Current Status:</span>
-        <span class="p-value">{{issue.fields.status.name}}</span>
       </div>
     {{/if}}
     {{#if issue.fields.project.projectTypeKey}}
@@ -230,6 +252,16 @@
             </div>
           </div>
         {{/each}}
+      </div>
+    {{/if}}
+    
+    {{!-- flashMessage container --}}
+    {{#if issue.__flashMessage}}
+      <div class="flash-message-container {{issue.__flashMessageType}}">
+        <div>{{issue.__flashMessage}}</div>
+        <button type="button" class="close" {{action "clearFlashMessage" issueIndex}}>
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
     {{/if}}
   </div>

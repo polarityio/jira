@@ -113,7 +113,8 @@ module.exports = {
     {
       key: 'userName',
       name: 'Jira Email Address',
-      description: 'Email address used for individual to access Jira.  Only required when authenticating to Jira Cloud.',
+      description:
+        'Email address used for individual to access Jira.  Only required when authenticating to Jira Cloud.',
       default: '',
       type: 'text',
       userCanEdit: false,
@@ -136,6 +137,15 @@ module.exports = {
         'If no value is provided, all accessible projects will be searched.  This setting does not affect searches on Jira Issue Keys and is only used for searches on other entities (e.g., IP, domain, cve, etc.).',
       default: '',
       type: 'text',
+      userCanEdit: false,
+      adminOnly: false
+    },
+    {
+      key: 'enableUpdatingStatus',
+      name: 'Enable Updating Issue Status',
+      description: 'If enabled, users will be able to update the issue status of an issue',
+      default: false,
+      type: 'boolean',
       userCanEdit: false,
       adminOnly: false
     },

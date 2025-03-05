@@ -89,6 +89,15 @@
       "adminOnly": false
     },
     {
+      "key": "enableUpdatingStatus",
+      "name": "Enable Updating Issue Status",
+      "description": "If enabled, users will be able to update the issue status of an issue",
+      "default": false,
+      "type": "boolean",
+      "userCanEdit": false,
+      "adminOnly": false
+    },
+    {
       "key": "ignoreList",
       "name": "Ignored Entities List",
       "description": "A comma delimited list entities you wish to ignore from search",
