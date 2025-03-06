@@ -10,6 +10,7 @@ const { createResultObject } = require('./src/create-result-object');
 const { getCommentsByIssueId } = require('./src/get-comments-by-issue-id');
 const { downloadIconByUrl } = require('./src/download-icon-by-url');
 const { updateIssueTransition } = require('./src/update-issue-transition');
+const { getBulkPermissions } = require('./src/get-bulk-permissions');
 const { setLogger } = require('./src/logger');
 
 let log = null;
@@ -183,6 +184,12 @@ async function onDetails(resultObject, options, cb) {
   try {
     resultObject.data.details.issues = await getCommentsAndAddToIssues(resultObject.data.details.issues, options);
     resultObject.data.details.icons = await getRequiredIcons(resultObject.data.details.issues, options);
+    resultObject.data.details.permissions = await getBulkPermissions(
+      resultObject.data.details.issues.map((issue) => issue.id),
+      options
+    );
+    
+    log.trace({ resultObject }, 'onDetails result');
 
     cb(null, resultObject.data);
   } catch (e) {

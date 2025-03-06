@@ -6,6 +6,7 @@ polarity.export = PolarityComponent.extend({
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }),
   state: Ember.computed.alias('block._state'),
+  permissions: Ember.computed.alias('block.data.details.permissions'),
   // Session Paging Variables
   filterValue: '',
   currentPage: 1,

@@ -59,27 +59,29 @@
     {{/if}}
     
     {{#if issue.fields.status.name}}
-      {{#if block.userOptions.enableUpdatingStatus}}
-        <div class="status-select mb-1">
-          <div class="label p-key">
-            <div class="p-1">
-              Status
+      {{#let (get permissions issue.id) as | issuePermissions |}}
+        {{#if (and block.userOptions.enableUpdatingStatus issuePermissions.TRANSITION_ISSUES)}}
+          <div class="status-select mb-1">
+            <div class="label p-key">
+              <div class="p-1">
+                Status
+              </div>
             </div>
+            <select disabled={{if (or issue.__updating state.isDetailsLoading) true}} onchange={{action (action "updateIssueTransition" issueIndex issue.id) value="target.value"}}>
+              {{#each issue.transitions as | transition |}}
+                <option value="{{transition.id}}" selected={{eq transition.to.id issue.fields.status.id}}>
+                  {{transition.name}}
+                </option>            
+              {{/each}}
+            </select>          
           </div>
-          <select disabled={{if (or issue.__updating state.isDetailsLoading) true}} onchange={{action (action "updateIssueTransition" issueIndex issue.id) value="target.value"}}>
-            {{#each issue.transitions as | transition |}}
-              <option value="{{transition.id}}" selected={{eq transition.to.id issue.fields.status.id}}>
-                {{transition.name}}
-              </option>            
-            {{/each}}
-          </select>          
-        </div>
-      {{else}}
-        <div>
-          <span class="p-key">Current Status:</span>
-          <span class="p-value">{{issue.fields.status.name}}</span>
-        </div>
-      {{/if}}      
+        {{else}}
+          <div>
+            <span class="p-key">Current Status:</span>
+            <span class="p-value">{{issue.fields.status.name}}</span>
+          </div>
+        {{/if}}      
+      {{/let}}
     {{/if}}
     {{#if issue.fields.issuetype.name}}
       <div>
