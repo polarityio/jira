@@ -11,6 +11,7 @@ const { getCommentsByIssueId } = require('./src/get-comments-by-issue-id');
 const { downloadIconByUrl } = require('./src/download-icon-by-url');
 const { updateIssueTransition } = require('./src/update-issue-transition');
 const { getBulkPermissions } = require('./src/get-bulk-permissions');
+const { addCommentToIssue } = require('./src/add-comment-to-issue');
 const { setLogger } = require('./src/logger');
 
 let log = null;
@@ -188,7 +189,7 @@ async function onDetails(resultObject, options, cb) {
       resultObject.data.details.issues.map((issue) => issue.id),
       options
     );
-    
+
     log.trace({ resultObject }, 'onDetails result');
 
     cb(null, resultObject.data);
@@ -233,7 +234,18 @@ async function onMessage(payload, options, cb) {
         });
       } catch (e) {
         log.error(e, 'Error updating transitions');
-        cb(errorToPojo(e, 'Error fetching transitions'));
+        cb(errorToPojo(e, 'Error updating transitions'));
+      }
+      break;
+    case 'ADD_COMMENT':
+      try {
+        const newComment = await addCommentToIssue(payload.issueId, payload.comment, options);
+        cb(null, {
+          comment: newComment
+        });
+      } catch (e) {
+        log.error(e, 'Error adding comment');
+        cb(errorToPojo(e, 'Error adding comment'));
       }
       break;
     default:

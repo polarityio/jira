@@ -6,6 +6,8 @@ polarity.export = PolarityComponent.extend({
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }),
   state: Ember.computed.alias('block._state'),
+  notificationsData: Ember.inject.service('notificationsData'),
+  flashMessages: Ember.inject.service('flashMessages'),
   permissions: Ember.computed.alias('block.data.details.permissions'),
   // Session Paging Variables
   filterValue: '',
@@ -102,16 +104,47 @@ polarity.export = PolarityComponent.extend({
       this.set(`pagedPagingData.${issueIndex}.__updating`, true);
       this.sendIntegrationMessage(payload)
         .then((result) => {
-          this.flashMessage(issueIndex, `Status successfully updated to "${transitionName}"`, 'success');
+          this.flashMessage(`Status updated to "${transitionName}"`, 'success');
           this.set(`pagedPagingData.${issueIndex}.fields.status`, result.status);
         })
         .catch((err) => {
           console.error(err);
-          this.flashMessage(issueIndex, `Failed to update status`, 'error');
+          this.flashMessage(`Failed to update status`, 'error');
         })
         .finally(() => {
           this.set(`pagedPagingData.${issueIndex}.__updating`, false);
         });
+    },
+    addComment(issueIndex, issueId, comment) {
+      this.set(`pagedPagingData.${issueIndex}.__updating`, true);
+      this.set(`pagedPagingData.${issueIndex}.__savingComment`, true);
+      const payload = {
+        action: 'ADD_COMMENT',
+        issueId,
+        comment
+      };
+      this.sendIntegrationMessage(payload)
+        .then((result) => {
+          this.flashMessage(`Successfully added comment`, 'success');
+          const comments = this.get(`pagedPagingData.${issueIndex}.comments`);
+          comments.unshift(result.comment);
+          // New array reference here triggers a template refresh
+          this.set(`pagedPagingData.${issueIndex}.comments`, [...comments]);
+          this.set(`pagedPagingData.${issueIndex}.__commentText`, '');
+          this.set(`pagedPagingData.${issueIndex}.__showAddComment`, false);
+        })
+        .catch((err) => {
+          console.error(err);
+          this.flashMessage(`Failed to add comment`, 'danger');
+        })
+        .finally(() => {
+          this.set(`pagedPagingData.${issueIndex}.__updating`, false);
+          this.set(`pagedPagingData.${issueIndex}.__savingComment`, false);
+        });
+    },
+    cancelComment(issueIndex) {
+      this.set(`pagedPagingData.${issueIndex}.__commentText`, '');
+      this.set(`pagedPagingData.${issueIndex}.__showAddComment`, false);
     },
     clearFlashMessage(issueIndex) {
       this.set(`pagedPagingData.${issueIndex}.__flashMessage`, '');
@@ -119,18 +152,15 @@ polarity.export = PolarityComponent.extend({
   },
   /**
    * Flash a message on the screen for a specific issue
-   * @param issueIndex the paged index (i.e., index of the currently displayed issues)
    * @param message
-   * @param type 'info', 'error', or 'success'
+   * @param type 'info', 'danger', or 'success'
    */
-  flashMessage(issueIndex, message, type = 'info') {
-    this.set(`pagedPagingData.${issueIndex}.__flashMessage`, message);
-    this.set(`pagedPagingData.${issueIndex}.__flashMessageType`, type);
-
-    setTimeout(() => {
-      if (!this.isDestroyed) {
-        this.set(`pagedPagingData.${issueIndex}.__flashMessage`, '');
-      }
-    }, 2000);
+  flashMessage(message, type = 'info') {
+    this.flashMessages.add({
+      message: `${this.block.acronym}: ${message}`,
+      type: `unv-${type}`,
+      icon: type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle',
+      timeout: 3000
+    });
   }
 });

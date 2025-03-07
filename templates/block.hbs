@@ -234,6 +234,37 @@
         {{#if (eq issue.comments.length 0)}}
           No Comments
         {{/if}}
+        {{#let (get permissions issue.id) as | issuePermissions |}}
+          {{#if issuePermissions.ADD_COMMENTS}}
+            {{#unless issue.__showAddComment}}
+              <div class="add-comment-btn-container">
+                <span class="p-action" {{action (toggle "__showAddComment" issue)}}>
+                  {{fa-icon icon="plus-circle"}} Add Comment
+                </span>
+              </div>
+            {{/unless}}
+            {{#if issue.__showAddComment}}
+              <div class="add-comment-form-container mb-2">
+                <div class="mb-1">
+                  <textarea
+                    class="form-control" 
+                    rows="3" 
+                    value={{issue.__commentText}}
+                    onInput={{action (mut issue.__commentText) value="target.value"}}>                    
+                  </textarea>
+                </div>
+                <button class="btn btn-polarity" {{action "addComment" issueIndex issue.id issue.__commentText}} disabled={{if (or (not issue.__commentText) state.isDetailsLoading issue.__savingComment) true}}>
+                  {{#if issue.__savingComment}}
+                    {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
+                  {{else}}
+                    Save
+                  {{/if}}
+                </button>
+                <button class="btn btn-cancel" {{action "cancelComment" issueIndex}} disabled={{if issue.__savingComment true}}>Cancel</button>
+              </div>
+            {{/if}}
+          {{/if}}
+        {{/let}}
         {{#each issue.comments as |comment|}}
           <div class="comment-container">
             <div class="d-flex align-items-center">
