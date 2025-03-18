@@ -22,7 +22,7 @@
   ],
   "defaultColor": "light-blue",
   "logging": {
-    "level": "info"
+    "level": "trace"
   },
   "request": {
     "cert": "",
@@ -91,9 +91,45 @@
     {
       "key": "enableUpdatingStatus",
       "name": "Enable Updating Issue Status",
-      "description": "If enabled, users will be able to update the issue status of an issue",
+      "description": "If enabled, users will be able to update the issue status of an issue.",
       "default": false,
       "type": "boolean",
+      "userCanEdit": false,
+      "adminOnly": false
+    },
+    {
+      "key": "enableAddingComments",
+      "name": "Enable Adding Comments",
+      "description": "If enabled, users will be able to add comments to issues. ",
+      "default": false,
+      "type": "boolean",
+      "userCanEdit": false,
+      "adminOnly": false
+    },
+    {
+      "key": "enableCreatingIssues",
+      "name": "Enable Creating Issues",
+      "description": "Select the search criteria to use when searching scoutPRIME.  Only indicators that meet the selected criteria will be returned.  Defaults to \"All\".",
+      "default": {
+        "value": "disabled",
+        "display": "Disabled -- Users cannot create issues"
+      },
+      "type": "select",
+      "options": [
+        {
+          "value": "disabled",
+          "display": "Disabled -- Users cannot create issues"
+        },
+        {
+          "value": "enabledSearchOnly",
+          "display": "Enabled -- Create issues when Jira search results exist"
+        },
+        {
+          "value": "enabledAlways",
+          "display": "Enabled - Create Jira issues always available"
+        }
+      ],
+      "multiple": false,
       "userCanEdit": false,
       "adminOnly": false
     },

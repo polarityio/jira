@@ -1,10 +1,179 @@
-{{#if details.jql}}
-  <div class="mb-1">
-    <a class="p-link" href="{{jiraFqdn}}/issues/?jql={{details.jql}}">Run search in Jira {{fa-icon icon="external-link"
-                                                                                                   fixedWidth=true
-                                                                                                   class="external-link-icon"}}</a>
+<div class="d-flex justify-content-between align-items-center">
+  {{#if details.jql}}
+    <div class="mb-1">
+      <a class="p-link" href="{{jiraFqdn}}/issues/?jql={{details.jql}}">Run search in Jira {{fa-icon icon="external-link"
+                                                                                                     fixedWidth=true
+                                                                                                     class="external-link-icon"}}</a>
+    </div>
+  {{/if}}
+  {{#if (and (not state.createIssue.showCreateIssue)(not-eq block.userOptions.enableCreatingIssues.value "disabled"))}}
+    <div class="add-comment-btn-container">
+      <span class="p-action" {{action (pipe (action "loadProjects")(toggle "createIssue.showCreateIssue" state))}}>
+        {{fa-icon icon="plus-circle"}} Create Issue
+      </span>
+    </div>
+  {{/if}}
+</div>
+
+{{!-- Beginning of Create Issue Form --}}
+{{#if state.createIssue.showCreateIssue}}
+  <div class="create-issue-container">  
+    <div class="input-container">
+      <label class="small ifta-label">
+        Project
+        <span class="required">*</span>
+      </label>
+      <select
+        class="ifta-field"
+        {{on "change" (pipe-action (pick "target.value" (set state.createIssue "selectedProjectId"))(action "loadIssueTypes"))}}
+        required=true
+        disabled={{state.createIssue.loadingProjects}}
+      >
+        {{#if state.createIssue.loadingProjects}}
+          <option selected>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loading projects ...</option>
+        {{else}}
+          <option selected disabled>Select a project</option>
+        {{/if}}
+        {{#each state.createIssue.projects as | project |}}
+          <option value="{{project.id}}" selected={{if (eq state.createIssue.selectedProjectId project.id) true}}>{{project.name}} ({{project.key}})</option>
+        {{/each}}
+      </select>
+      {{#if state.createIssue.loadingProjects}}
+          {{fa-icon icon="spinner-third" spin=true class="select-loading-spinner"}}
+      {{/if}}
+      {{fa-icon icon="chevron-down" fixedWidth=true class="select-arrow"}}
+    </div>
+    <div class="input-container">
+      <label class="small ifta-label">
+        Issue Type
+        <span class="required">*</span>
+      </label>
+      <select
+        class="ifta-field"
+        {{on "change" (pipe-action (pick "target.value" (set state.createIssue "selectedIssueType"))(action "loadIssueFields" state.createIssue.selectedProjectId state.createIssue.selectedIssueType))}}
+          required=true
+          disabled={{or state.createIssue.loadingIssueTypes state.createIssue.loadingProjects (not state.createIssue.selectedProjectId)}}
+      >
+        {{#if state.createIssue.loadingIssueTypes}}
+          <option selected>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loading issue types ...</option>
+        {{else}}
+          <option selected disabled>Select an Issue Type</option>
+        {{/if}}
+        {{#each state.createIssue.issueTypes as | issueType |}}
+          <option value="{{issueType.id}}" selected={{if (eq state.createIssue.selectedIssueType issueType.id) true}}>{{issueType.name}}</option>
+        {{/each}}
+      </select>
+      {{#if state.createIssue.loadingIssueTypes}}
+        {{fa-icon icon="spinner-third" spin=true class="select-loading-spinner"}}
+      {{/if}}
+      {{fa-icon icon="chevron-down" fixedWidth=true class="select-arrow"}}
+    </div>
+    {{#if state.createIssue.loadingIssueFields}}
+      <div class="mb-2">
+        {{fa-icon icon="spinner-third" spin=true}} Loading fields ...
+      </div>
+    {{/if}}
+    {{#if (and (not state.createIssue.loadingIssueFields) displayIssueFields)}}
+      {{#each state.createIssue.issueFields as | field |}}
+        {{!-- We go from more specific fields to less specific --}}
+        {{#if
+          (or 
+            (eq field.schema.system "summary")
+            (and (eq field.schema.type "string")(eq field.required true))
+          )
+        }}
+          <div class="input-container" {{did-insert (set field "__isRendered" true)}}>
+            <label class="small ifta-label">
+              {{field.name}}
+              {{#if field.required}}
+                <span class="required">*</span>  
+              {{/if}}                
+            </label>
+            {{input
+              class=(concat "ifta-field" (if field.__error " error"))
+              value=field.__value
+              placeholder=(get uiElement "placeholder")
+              disabled=state.createIssue.isCreatingIssue
+              required=(if field.required true false)
+            }}
+          </div>
+        {{else if (eq field.schema.system "description")}}
+          <div 
+            class="input-container text-area-container {{if block._state.isSending "disabled"}} {{if field.__error "error"}}"
+            {{did-insert (set field "__isRendered" true)}}
+          >
+            <label class="small">
+              {{field.name}}
+              {{#if field.required}}
+                <span class="required">*</span>
+              {{/if}}
+            </label>
+            {{textarea
+                class="ifta-field"
+                rows=5
+                placeholder=(get uiElement "placeholder")
+                value=field.__value
+                disabled=state.createIssue.isCreatingIssue
+                required=(if field.required true false)
+            }}
+          </div>
+        {{/if}}
+        {{#if field.__error}}
+          <div class="ifta-error-message">
+            {{field.__error}}
+          </div>
+        {{/if}}
+    {{/each}}
+    {{/if}}
+    <button class="btn btn-polarity" {{action "createIssue"}} disabled={{if (or (not displayIssueFields) state.createIssue.isCreatingIssue) true}}>
+      {{#if state.createIssue.isCreatingIssue}}
+        {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
+      {{else}}
+        Create
+      {{/if}}
+    </button>
+    <button class="btn btn-cancel" {{action (pipe-action (toggle "createIssue.showCreateIssue" state)(action "clearCreateIssuefields"))}} disabled={{if state.createIssue.isCreatingIssue true}}>Cancel</button>
+
+    {{#if state.createIssue.errorMessage}}
+      <div class="alert alert-danger error-message mt-2">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="error-message-title">
+            {{#if state.createIssue.errorTitle}}
+              {{state.createIssue.errorTitle}}
+            {{else}}
+              Unexpected Error Occurred
+            {{/if}}            
+          </div>
+          <div>
+            {{fa-icon icon="times" fixedWidth=true click=(set state "createIssue.errorMessage" "") class="close-icon"}}
+          </div>
+        </div>
+        <div class="error-scrolling-container">
+          <pre>{{state.createIssue.errorMessage}}</pre>
+        </div>
+      </div>
+    {{/if}}
   </div>
 {{/if}}
+{{!-- End of Create Issue Form --}}
+
+{{!-- Created Issue Success Container --}}
+{{#if state.createIssue.lastCreatedIssue}}
+  <div class="issue-created-container">
+    <div class="d-flex align-items-center">
+      Successfully created Issue {{state.createIssue.lastCreatedIssue}}
+    </div>
+    <div class="mt-1">
+      <span class="p-action" {{action "runSearchInPolarity" state.createIssue.lastCreatedIssue}}>{{fa-icon icon="search" fixedWidth=true class="external-link-icon"}} Open in Polarity</span>
+    </div>
+    <div class="mt-1">
+      <a class="d-flex align-items-center" href="{{jiraFqdn}}/browse/{{state.createIssue.lastCreatedIssue}}" target="_blank">
+        {{fa-icon icon="external-link" fixedWidth=true class="external-link-icon mr-1"}} View in Jira
+      </a>
+    </div>
+  </div>
+{{/if}}
+{{!-- End of Created Issue Success Container --}}
 
 {{!-- Beginning of Paging Header --}}
 {{#if (gt filteredPagingData.length 0)}}
@@ -23,6 +192,8 @@
   </div>
 {{/if}}
 {{!-- End of Paging Header --}}
+
+
 
 {{#each pagedPagingData as |issue issueIndex|}}
   <div class="issue-container">
@@ -157,7 +328,7 @@
   
     {{#if issue.fields.labels}}
       <h1 class="p-title">
-        {{fa-icon icon="tags" fixedWidth=true}} Labels
+        Labels
       </h1>
   
       <div class="tags">
@@ -235,7 +406,7 @@
           No Comments
         {{/if}}
         {{#let (get permissions issue.id) as | issuePermissions |}}
-          {{#if issuePermissions.ADD_COMMENTS}}
+          {{#if (and issuePermissions.ADD_COMMENTS block.userOptions.enableAddingComments)}}
             {{#unless issue.__showAddComment}}
               <div class="add-comment-btn-container">
                 <span class="p-action" {{action (toggle "__showAddComment" issue)}}>
@@ -253,6 +424,54 @@
                     onInput={{action (mut issue.__commentText) value="target.value"}}>                    
                   </textarea>
                 </div>
+                {{!--
+                <div class="write-container">
+                  <div class="mt-2">
+                    Data from selected integrations will be submitted as part of the comment in JSON format.
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="p-action {{if (eq state.integrations.length 0) "invisible"}}" {{action "toggleAllIntegrations"}}>
+                      Toggle All Integrations
+                    </div>
+                    <div class="d-flex align-items-center justify-content-between">
+                      <div class="p-footnote {{if (eq state.integrations.length 0) "invisible"}}">
+                        {{numSelectedWriteIntegrations}} selected
+                      </div>
+                      <button class="btn ml-1 icon-btn p-action" {{action "refreshIntegrations"}} title="Refresh integrations">
+                        {{fa-icon icon="sync" fixedWidth=true spin=state.spinRefresh}}
+                      </button>
+                    </div>
+                  </div>
+                  <div
+                    class="integration-labels-container {{if state.missingIntegrations "error-text"}} {{if state.isWriting "disabled"}}"
+                  >
+                    {{#each state.integrations as | integration |}}
+                      <label class="integration-write-label d-flex align-items-center">
+                        <input
+                                disabled={{state.isWriting}}
+                                type="checkbox"
+                                checked={{integration.selected}}
+                                onclick={{action (mut integration.selected) value="target.checked"}}
+                        >
+                        <div class="label-text">
+                          {{integration.integrationName}}
+                        </div>
+                      </label>
+                    {{/each}}
+                    {{#if (eq state.integrations.length 0)}}
+                      <div>No integration data available.</div>
+                      <div class="p-action mt-1" {{action "refreshIntegrations"}}>Click here to refresh integration data</div>
+                    {{/if}}
+                  </div>
+                  <div class="integration-labels-description p-footnote {{if state.missingIntegrations "error-text"}}">
+                    {{#if (eq state.integrations.length 0)}}
+                      At least one integration must return data before you can submit evidence.
+                    {{else}}
+                      Select one or more integrations to use as Evidence
+                    {{/if}}
+                  </div>
+                </div>
+                --}}
                 <button class="btn btn-polarity" {{action "addComment" issueIndex issue.id issue.__commentText}} disabled={{if (or (not issue.__commentText) state.isDetailsLoading issue.__savingComment) true}}>
                   {{#if issue.__savingComment}}
                     {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}

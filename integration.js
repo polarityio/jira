@@ -12,21 +12,13 @@ const { downloadIconByUrl } = require('./src/download-icon-by-url');
 const { updateIssueTransition } = require('./src/update-issue-transition');
 const { getBulkPermissions } = require('./src/get-bulk-permissions');
 const { addCommentToIssue } = require('./src/add-comment-to-issue');
+const { getProjects } = require('./src/get-projects.js');
+const { getIssueTypesByProject } = require('./src/get-issue-types-by-project.js');
+const { addIssue } = require('./src/add-issue.js');
 const { setLogger } = require('./src/logger');
+const { getIssueFields } = require('./src/get-issue-fields');
 
 let log = null;
-// Contains valid statuses for each project and issue type
-// {
-//   "projectId": {
-//     "issueType": [
-//       {
-//         // status object
-//       }
-//     ]
-//   }
-// }
-//
-const issueStatusCache = {};
 
 // Project and Task icons require authentication to display so we fetch them and store them here
 // This way we only fetch the icon the first time we see it.  The cache is keyed on the URL of the
@@ -69,14 +61,6 @@ async function doLookup(entities, options, cb) {
         apiResponse = await searchIssues(entityObj, options);
       }
 
-      // Currently not using as we need to fetch transitions on a per-issue basis but we
-      // do this in onDetails
-      // if (Array.isArray(apiResponse.issues)) {
-      //   await async.eachLimit(apiResponse.issues, 5, async (issue) => {
-      //     issue.__statuses = await getValidStatuses(issue, options);
-      //   });
-      // }
-
       lookupResults.push(createResultObject(entityObj, apiResponse, options));
     });
   } catch (error) {
@@ -89,41 +73,6 @@ async function doLookup(entities, options, cb) {
 
 function computeMd5(data) {
   return crypto.createHash('md5').update(data).digest('hex');
-}
-
-/**
- * Returns valid statuses for the given issue.  Attempts to get the statuses out of the cache.
- * If not available in the cache, the statuses will be loaded via REST, stored in the cache,
- * and then returned.
- *
- * In Jira, each issue type within a project has its own set of unique statuses.
- *
- * @param issue
- * @param options
- * @returns {Promise<*>}
- */
-async function getValidStatuses(issue, options) {
-  const projectId = _.get(issue, 'fields.project.id', null);
-  const issueId = _.get(issue, 'fields.issuetype.id', null);
-
-  if (projectId && issueId) {
-    if (!issueStatusCache[projectId]) {
-      issueStatusCache[projectId] = {};
-    }
-
-    if (issueStatusCache[projectId][issueId]) {
-      log.trace({ statuses: issueStatusCache[projectId][issueId] }, 'Fetching issue statuses from cache');
-      return issueStatusCache[projectId][issueId];
-    }
-
-    const body = await getStatusesForProject(projectId, options);
-
-    body.forEach((issueType) => {
-      issueStatusCache[projectId][issueType.id] = issueType.statuses;
-    });
-
-    return issueStatusCache[projectId][issueId];
-  }
 }
 
 /**
@@ -226,6 +175,11 @@ async function onMessage(payload, options, cb) {
   switch (payload.action) {
     case 'UPDATE_TRANSITION':
       try {
+        if (!options.enableUpdatingStatus) {
+          return cb({
+            error: 'Updating Issue status is disabled for this integration'
+          });
+        }
         await updateIssueTransition(payload.issueId, payload.transitionId, options);
         const body = await getIssueById(payload.issueId, options);
         const status = body.issues[0].fields.status;
@@ -239,6 +193,11 @@ async function onMessage(payload, options, cb) {
       break;
     case 'ADD_COMMENT':
       try {
+        if (!options.enableAddingComments) {
+          return cb({
+            error: 'Adding comments is disabled for this integration'
+          });
+        }
         const newComment = await addCommentToIssue(payload.issueId, payload.comment, options);
         cb(null, {
           comment: newComment
@@ -246,6 +205,70 @@ async function onMessage(payload, options, cb) {
       } catch (e) {
         log.error(e, 'Error adding comment');
         cb(errorToPojo(e, 'Error adding comment'));
+      }
+      break;
+    case 'GET_PROJECTS':
+      try {
+        if (options.enableCreatingIssues.value === 'disabled') {
+          return cb({
+            error: 'Adding issues is disabled for this integration'
+          });
+        }
+        const projects = await getProjects(options);
+        cb(null, {
+          projects
+        });
+      } catch (e) {
+        log.error(e, 'Error getting Projects');
+        cb(errorToPojo(e, 'Error getting Projects'));
+      }
+      break;
+    case 'GET_ISSUE_TYPES':
+      try {
+        if (options.enableCreatingIssues.value === 'disabled') {
+          return cb({
+            error: 'Adding issues is disabled for this integration'
+          });
+        }
+        const issueTypes = await getIssueTypesByProject(payload.projectId, options);
+        cb(null, {
+          issueTypes
+        });
+      } catch (e) {
+        log.error(e, 'Error getting issue types');
+        cb(errorToPojo(e, 'Error getting issue types'));
+      }
+      break;
+    case 'ADD_ISSUE':
+      try {
+        if (options.enableCreatingIssues.value === 'disabled') {
+          return cb({
+            error: 'Adding issues is disabled for this integration'
+          });
+        }
+        const issue = await addIssue(payload.projectId, payload.issueType, payload.fields, options);
+        cb(null, {
+          issue
+        });
+      } catch (e) {
+        log.error(e, 'Error creating issue');
+        cb(errorToPojo(e, 'Error creating issue'));
+      }
+      break;
+    case 'GET_ISSUE_FIELDS':
+      try {
+        if (options.enableCreatingIssues.value === 'disabled') {
+          return cb({
+            error: 'Adding issues is disabled for this integration'
+          });
+        }
+        const issueFields = await getIssueFields(payload.projectId, payload.issueType, options);
+        cb(null, {
+          issueFields
+        });
+      } catch (e) {
+        log.error(e, 'Error getting issue field meta');
+        cb(errorToPojo(e, 'Error getting issue field meta'));
       }
       break;
     default:

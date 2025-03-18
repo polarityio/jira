@@ -7,8 +7,26 @@ polarity.export = PolarityComponent.extend({
   }),
   state: Ember.computed.alias('block._state'),
   notificationsData: Ember.inject.service('notificationsData'),
+  polarityx: Ember.inject.service('polarityx'),
+  windowService: Ember.inject.service('window'),
+  searchData: Ember.inject.service('searchData'),
   flashMessages: Ember.inject.service('flashMessages'),
   permissions: Ember.computed.alias('block.data.details.permissions'),
+  displayIssueFields: Ember.computed(
+    'state.createIssue.selectedProjectId',
+    'state.createIssue.selectedIssueType',
+    function () {
+      let projectId = this.get('state.createIssue.selectedProjectId');
+      let issueType = this.get('state.createIssue.selectedIssueType');
+
+      // Checks that each value is not null/undefined and not an empty string.
+      // 0 will pass this check (which we want to allow).
+      let isValidProject = projectId != null && projectId !== '' && typeof projectId !== 'undefined';
+      let isValidIssueType = issueType != null && issueType !== '' && typeof issueType !== 'undefined';
+
+      return isValidProject && isValidIssueType;
+    }
+  ),
   // Session Paging Variables
   filterValue: '',
   currentPage: 1,
@@ -55,6 +73,12 @@ polarity.export = PolarityComponent.extend({
     if (!this.get('state')) {
       this.set('state', {});
       this.set('state.isDetailsLoading', true);
+      this.set('state.createIssue', {});
+      this.set('state.createIssue.showCreateIssue', false);
+      this.set('state.createIssue.selectedProject', '');
+      this.set('state.createIssue.selectedIssueType', '');
+      this.set('state.createIssue.loadingProjects', false);
+      //this.set('state.createIssue.lastCreatedIssue', 'PC-28');
     }
   },
   onDetailsLoaded() {
@@ -148,6 +172,147 @@ polarity.export = PolarityComponent.extend({
     },
     clearFlashMessage(issueIndex) {
       this.set(`pagedPagingData.${issueIndex}.__flashMessage`, '');
+    },
+    loadProjects() {
+      this.clearErrors();
+
+      // Only loadProjects if we haven't already loaded them
+      if (this.get('state.createIssue.projects')) {
+        return;
+      }
+      const payload = {
+        action: 'GET_PROJECTS'
+      };
+      this.set('state.createIssue.loadingProjects', true);
+      this.sendIntegrationMessage(payload)
+        .then((result) => {
+          this.set('state.createIssue.projects', result.projects);
+          this.set('state.createIssue.selectedIssueType', '');
+        })
+        .catch((e) => {
+          console.error('Failed to load projects', e);
+          this.flashMessage(`Failed to load projects`, 'danger');
+          this.set('state.createIssue.errorMessage', JSON.stringify(e, null, 2));
+          this.set('state.createIssue.errorTitle', 'Failed to load projects');
+        })
+        .finally(() => {
+          this.set('state.createIssue.loadingProjects', false);
+        });
+    },
+    loadIssueTypes() {
+      this.clearErrors();
+
+      this.set('state.createIssue.selectedIssueType', '');
+      const payload = {
+        action: 'GET_ISSUE_TYPES',
+        projectId: this.get('state.createIssue.selectedProjectId')
+      };
+      this.set('state.createIssue.loadingIssueTypes', true);
+      this.sendIntegrationMessage(payload)
+        .then((result) => {
+          this.set('state.createIssue.issueTypes', result.issueTypes);
+        })
+        .catch((e) => {
+          console.error('Failed to load projects', e);
+          this.flashMessage(`Failed to load issue types`, 'danger');
+          this.set('state.createIssue.errorMessage', JSON.stringify(e, null, 2));
+          this.set('state.createIssue.errorTitle', 'Failed to load issue types');
+        })
+        .finally(() => {
+          this.set('state.createIssue.loadingIssueTypes', false);
+        });
+    },
+    loadIssueFields(projectId, issueType) {
+      this.clearErrors();
+
+      const payload = {
+        action: 'GET_ISSUE_FIELDS',
+        projectId,
+        issueType
+      };
+      this.set('state.createIssue.loadingIssueFields', true);
+      return this.sendIntegrationMessage(payload)
+        .then((result) => {
+          this.set('state.createIssue.issueFields', result.issueFields);
+        })
+        .catch((e) => {
+          console.error('Failed to load issue field meta', e);
+          this.flashMessage(`Failed to load issue fields`, 'danger');
+          this.set('state.createIssue.errorMessage', JSON.stringify(e, null, 2));
+          this.set('state.createIssue.errorTitle', 'Failed to load issue fields');
+        })
+        .finally(() => {
+          this.set('state.createIssue.loadingIssueFields', false);
+        });
+    },
+    createIssue() {
+      this.clearErrors();
+
+      if (!this.validateRequiredIssueFields()) {
+        this.set('state.createIssue.shortErrorMessage', 'Missing required fields');
+        return;
+      }
+
+      this.set('state.createIssue.isCreatingIssue', true);
+      const payload = {
+        action: 'ADD_ISSUE',
+        projectId: this.get('state.createIssue.selectedProjectId'),
+        issueType: this.get('state.createIssue.selectedIssueType'),
+        fields: this.get('state.createIssue.issueFields').filter((field) => field.__isRendered)
+      };
+
+      this.sendIntegrationMessage(payload)
+        .then((result) => {
+          this.flashMessage(`Issue ${result.issue.key} created successfully`, 'success');
+          this.set('state.createIssue.lastCreatedIssue', result.issue.key);
+          this.set(`state.createIssue.showCreateIssue`, false);
+          this.clearCreateIssueFields();
+        })
+        .catch((e) => {
+          console.error('Failed to create issue', e);
+          this.flashMessage(`Failed to create issue`, 'danger');
+          this.set('state.createIssue.errorMessage', JSON.stringify(e, null, 2));
+          this.set('state.createIssue.errorTitle', 'Failed to create issue');
+        })
+        .finally(() => {
+          this.set('state.createIssue.isCreatingIssue', false);
+        });
+    },
+    clearCreateIssuefields() {
+      this.clearCreateIssueFields();
+    },
+    runSearchInPolarity(searchTerm) {
+      //Run on demand search pivot, same as clicking the "Search Selected Node" button
+      if (this.windowService.isClientWindow) {
+        //Trigger Search in Polarity Desktop Client
+        this.polarityx.requestOnDemandLookup(searchTerm);
+      } else {
+        //Trigger Search in Web UI
+        this.searchData.getSearchResults(searchTerm);
+      }
+    },
+    refreshIntegrations: function () {
+      this.set('state.spinRefresh', true);
+      this.setIntegrationSelection();
+      setTimeout(() => {
+        if (!this.isDestroyed) {
+          this.set('state.spinRefresh', false);
+        }
+      }, 1000);
+    },
+    toggleAllIntegrations: function (issueIndex) {
+      const hasUnSelected = this.get('state.integrations').some((integration) => !integration.selected);
+      if (hasUnSelected) {
+        // toggle all integrations on if at least one integration is not selected
+        this.get('state.integrations').forEach((integration, index) => {
+          this.set(`state.integrations.${index}.selected`, true);
+        });
+      } else {
+        // all integrations are selected so toggle them all off
+        this.get('state.integrations').forEach((integration, index) => {
+          this.set(`state.integrations.${index}.selected`, false);
+        });
+      }
     }
   },
   /**
@@ -162,5 +327,83 @@ polarity.export = PolarityComponent.extend({
       icon: type === 'success' ? 'check-circle' : type === 'danger' ? 'exclamation-circle' : 'info-circle',
       timeout: 3000
     });
+  },
+  validateRequiredIssueFields() {
+    let valid = true;
+    this.get('state.createIssue.issueFields').forEach((field, fieldIndex) => {
+      if (field.__isRendered && field.required && !field.__value) {
+        this.set(`state.createIssue.issueFields.${fieldIndex}.__error`, `${field.name} is a required field.`);
+        valid = false;
+      }
+    });
+
+    return valid;
+  },
+  clearCreateIssueFields() {
+    this.get('state.createIssue.issueFields').forEach((field) => {
+      if (field.__isRendered && field.__value) {
+        field.__value = '';
+      }
+    });
+  },
+  clearErrors() {
+    this.set('state.createIssue.errorMessage', '');
+    this.set('state.createIssue.errorTitle', '');
+    const issueFields = this.get('state.createIssue.issueFields');
+    if (issueFields) {
+      issueFields.forEach((field, fieldIndex) => {
+        if (field.__isRendered) {
+          this.set(`state.createIssue.issueFields.${fieldIndex}.__error`, '');
+        }
+      });
+    }
+  },
+  setIntegrationSelection: function () {
+    let integrationData = this.getIntegrationData();
+    let annotations = this.getAnnotations();
+    if (Array.isArray(annotations) && annotations.length > 0) {
+      integrationData.unshift({
+        integrationName: 'Polarity Annotations',
+        data: annotations,
+        selected: false
+      });
+    }
+    this.set('state.integrations', integrationData);
+  },
+  getIntegrationData: function () {
+    const notificationList = this.notificationsData.getNotificationList();
+    const integrationBlocks = notificationList.findByValue(this.get('block.entity.value').toLowerCase());
+    return integrationBlocks.blocks.reduce((accum, block) => {
+      if (block.integrationName !== this.get('block.integrationName') && block.type !== 'polarity') {
+        accum.push({
+          integrationName: block.integrationName,
+          data: block.data,
+          selected: false
+        });
+      }
+      return accum;
+    }, []);
+  },
+  getAnnotations: function () {
+    const notificationList = this.notificationsData.getNotificationList();
+    const integrationBlocks = notificationList.findByValue(this.get('block.entity.value').toLowerCase());
+    const polarityBlock = integrationBlocks.blocks.find((block) => {
+      if (block.type === 'polarity') {
+        return block;
+      }
+    });
+    if (polarityBlock) {
+      let annotations = [];
+      polarityBlock.tagEntityPairs.forEach((pair) => {
+        annotations.push({
+          tag: pair.tag.tagName,
+          channel: pair.channel.channelName,
+          user: pair.get('user.username'),
+          applied: pair.applied
+        });
+      });
+      return annotations;
+    }
+    return null;
   }
 });
