@@ -67,7 +67,27 @@ async function doLookup(entities, options, cb) {
     return cb(error);
   }
 
+  const hasResult = lookupResults.some((lookupResult) => lookupResult.data !== null);
+
+  if (!hasResult && options.enableCreatingIssues.value === 'enabledAlways') {
+    lookupResults.push({
+      entity: {
+        ...entities[0],
+        value: 'Jira Issue Creator'
+      },
+      displayValue: 'Jira Issue Creator',
+      isVolatile: true,
+      data: {
+        summary: ['Create a New Jira Issue'],
+        details: {
+          noResults: true
+        }
+      }
+    });
+  }
+
   log.trace({ lookupResults }, 'doLookup results');
+
   cb(null, lookupResults);
 }
 
@@ -131,6 +151,10 @@ async function getRequiredIcons(issues, options) {
 }
 
 async function onDetails(resultObject, options, cb) {
+  if (resultObject.data.details.noResults) {
+    return cb(null, resultObject.data);
+  }
+
   try {
     resultObject.data.details.issues = await getCommentsAndAddToIssues(resultObject.data.details.issues, options);
     resultObject.data.details.icons = await getRequiredIcons(resultObject.data.details.issues, options);
