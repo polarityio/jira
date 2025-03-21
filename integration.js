@@ -14,6 +14,7 @@ const { getBulkPermissions } = require('./src/get-bulk-permissions');
 const { addCommentToIssue } = require('./src/add-comment-to-issue');
 const { getProjects } = require('./src/get-projects.js');
 const { getIssueTypesByProject } = require('./src/get-issue-types-by-project.js');
+const { addIntegrationDataToIssue } = require('./src/add-integration-data-to-issue');
 const { addIssue } = require('./src/add-issue.js');
 const { setLogger } = require('./src/logger');
 const { getIssueFields } = require('./src/get-issue-fields');
@@ -60,30 +61,22 @@ async function doLookup(entities, options, cb) {
       } else {
         apiResponse = await searchIssues(entityObj, options);
       }
+      const resultObject = createResultObject(entityObj, apiResponse, options);
+      if (resultObject.data === null && options.enableCreatingIssues.value === 'enabledAlways') {
+        // no result
+        resultObject.requireOtherData = true;
+        resultObject.data = {
+          summary: ['Create Issue'],
+          details: {
+            noResults: true
+          }
+        };
+      }
 
-      lookupResults.push(createResultObject(entityObj, apiResponse, options));
+      lookupResults.push(resultObject);
     });
   } catch (error) {
     return cb(error);
-  }
-
-  const hasResult = lookupResults.some((lookupResult) => lookupResult.data !== null);
-
-  if (!hasResult && options.enableCreatingIssues.value === 'enabledAlways') {
-    lookupResults.push({
-      entity: {
-        ...entities[0],
-        value: 'Jira Issue Creator'
-      },
-      displayValue: 'Jira Issue Creator',
-      isVolatile: true,
-      data: {
-        summary: ['Create a New Jira Issue'],
-        details: {
-          noResults: true
-        }
-      }
-    });
   }
 
   log.trace({ lookupResults }, 'doLookup results');
@@ -271,6 +264,9 @@ async function onMessage(payload, options, cb) {
           });
         }
         const issue = await addIssue(payload.projectId, payload.issueType, payload.fields, options);
+        if (payload.includeIntegrationData) {
+          await addIntegrationDataToIssue(issue.id, payload.entity, payload.username, payload.email, payload.integrationData, options);
+        }
         cb(null, {
           issue
         });

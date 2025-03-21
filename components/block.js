@@ -9,6 +9,7 @@ polarity.export = PolarityComponent.extend({
   notificationsData: Ember.inject.service('notificationsData'),
   polarityx: Ember.inject.service('polarityx'),
   windowService: Ember.inject.service('window'),
+  currentUser: Ember.inject.service('currentUser'),
   searchData: Ember.inject.service('searchData'),
   flashMessages: Ember.inject.service('flashMessages'),
   permissions: Ember.computed.alias('block.data.details.permissions'),
@@ -80,6 +81,7 @@ polarity.export = PolarityComponent.extend({
       this.set('state.createIssue.loadingProjects', false);
       //this.set('state.createIssue.lastCreatedIssue', 'PC-28');
     }
+    console.info('JIRA Block Component Init', this.get('block'));
   },
   onDetailsLoaded() {
     // only called once when the details are loaded and not
@@ -252,14 +254,31 @@ polarity.export = PolarityComponent.extend({
         this.set('state.createIssue.shortErrorMessage', 'Missing required fields');
         return;
       }
+      const includeIntegrationData = this.get('state.createIssue.showIntegrationData');
+      const selectedIntegrations = this.get('state.createIssue.integrations').filter(
+        (integration) => integration.selected
+      );
+
+      if (includeIntegrationData && selectedIntegrations.length === 0) {
+        this.set('state.createIssue.shortErrorMessage', 'No integrations selected');
+        return;
+      }
 
       this.set('state.createIssue.isCreatingIssue', true);
       const payload = {
         action: 'ADD_ISSUE',
         projectId: this.get('state.createIssue.selectedProjectId'),
         issueType: this.get('state.createIssue.selectedIssueType'),
-        fields: this.get('state.createIssue.issueFields').filter((field) => field.__isRendered)
+        fields: this.get('state.createIssue.issueFields').filter((field) => field.__isRendered),
+        includeIntegrationData,
+        username: this.currentUser.user.username,
+        email: this.currentUser.user.email,
+        entity: this.get('block.entity')
       };
+
+      if (payload.includeIntegrationData) {
+        payload.integrationData = selectedIntegrations;
+      }
 
       this.sendIntegrationMessage(payload)
         .then((result) => {
@@ -278,8 +297,11 @@ polarity.export = PolarityComponent.extend({
           this.set('state.createIssue.isCreatingIssue', false);
         });
     },
-    clearCreateIssuefields() {
+    clearCreateIssueFields() {
       this.clearCreateIssueFields();
+    },
+    createIssueIntegrationSelected() {
+      this.setNumSelectedIntegrations();
     },
     runSearchInPolarity(searchTerm) {
       //Run on demand search pivot, same as clicking the "Search Selected Node" button
@@ -292,28 +314,45 @@ polarity.export = PolarityComponent.extend({
       }
     },
     refreshIntegrations: function () {
-      this.set('state.spinRefresh', true);
+      this.set('state.createIssue.spinRefresh', true);
       this.setIntegrationSelection();
       setTimeout(() => {
         if (!this.isDestroyed) {
-          this.set('state.spinRefresh', false);
+          this.set('state.createIssue.spinRefresh', false);
         }
       }, 1000);
     },
     toggleAllIntegrations: function (issueIndex) {
-      const hasUnSelected = this.get('state.integrations').some((integration) => !integration.selected);
+      const hasUnSelected = this.get('state.createIssue.integrations').some((integration) => !integration.selected);
       if (hasUnSelected) {
         // toggle all integrations on if at least one integration is not selected
-        this.get('state.integrations').forEach((integration, index) => {
-          this.set(`state.integrations.${index}.selected`, true);
+        this.get('state.createIssue.integrations').forEach((integration, index) => {
+          this.set(`state.createIssue.integrations.${index}.selected`, true);
         });
       } else {
         // all integrations are selected so toggle them all off
-        this.get('state.integrations').forEach((integration, index) => {
-          this.set(`state.integrations.${index}.selected`, false);
+        this.get('state.createIssue.integrations').forEach((integration, index) => {
+          this.set(`state.createIssue.integrations.${index}.selected`, false);
         });
       }
+      this.setNumSelectedIntegrations();
     }
+  },
+  setNumSelectedIntegrations() {
+    let integrations = this.get('state.createIssue.integrations');
+    let numSelected = this.getNumSelectedIntegration(integrations);
+    this.set('state.createIssue.numSelectedWriteIntegrations', numSelected);
+  },
+  getNumSelectedIntegration(integrations) {
+    let selectedCount = 0;
+    if (integrations) {
+      integrations.forEach((integration) => {
+        if (integration.selected) {
+          selectedCount++;
+        }
+      });
+    }
+    return selectedCount;
   },
   /**
    * Flash a message on the screen for a specific issue
@@ -368,7 +407,8 @@ polarity.export = PolarityComponent.extend({
         selected: false
       });
     }
-    this.set('state.integrations', integrationData);
+    this.set('state.createIssue.integrations', integrationData);
+    this.setNumSelectedIntegrations();
   },
   getIntegrationData: function () {
     const notificationList = this.notificationsData.getNotificationList();
@@ -378,7 +418,7 @@ polarity.export = PolarityComponent.extend({
         accum.push({
           integrationName: block.integrationName,
           data: block.data,
-          selected: false
+          selected: true
         });
       }
       return accum;

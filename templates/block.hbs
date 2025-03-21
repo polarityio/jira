@@ -1,19 +1,10 @@
-<div class="d-flex justify-content-between align-items-center">
-  {{#if details.jql}}
-    <div class="mb-1">
-      <a class="p-link" href="{{jiraFqdn}}/issues/?jql={{details.jql}}">Run search in Jira {{fa-icon icon="external-link"
-                                                                                                     fixedWidth=true
-                                                                                                     class="external-link-icon"}}</a>
-    </div>
-  {{/if}}
-  {{#if (and (not state.createIssue.showCreateIssue)(not-eq block.userOptions.enableCreatingIssues.value "disabled"))}}
-    <div class="add-comment-btn-container">
+{{#if (and (not state.createIssue.showCreateIssue)(not-eq block.userOptions.enableCreatingIssues.value "disabled"))}}
+  <div class="mb-2">
       <span class="p-action" {{action (pipe (action "loadProjects")(toggle "createIssue.showCreateIssue" state))}}>
         {{fa-icon icon="plus-circle"}} Create Issue
       </span>
-    </div>
-  {{/if}}
-</div>
+  </div>
+{{/if}}
 
 {{!-- Beginning of Create Issue Form --}}
 {{#if state.createIssue.showCreateIssue}}
@@ -125,15 +116,82 @@
         {{/if}}
     {{/each}}
     {{/if}}
-    <button class="btn btn-polarity" {{action "createIssue"}} disabled={{if (or (not displayIssueFields) state.createIssue.isCreatingIssue) true}}>
-      {{#if state.createIssue.isCreatingIssue}}
-        {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
-      {{else}}
-        Create
-      {{/if}}
-    </button>
-    <button class="btn btn-cancel" {{action (pipe-action (toggle "createIssue.showCreateIssue" state)(action "clearCreateIssuefields"))}} disabled={{if state.createIssue.isCreatingIssue true}}>Cancel</button>
-
+    
+    
+    {{!-- Create Issue Integration Data --}}
+    <label class="add-integration-data-label d-flex align-items-center">
+      <input
+        disabled={{state.createIssue.isCreatingIssue}}
+        type="checkbox"
+        checked={{state.createIssue.showIntegrationData}}
+        onclick={{pipe-action (pick "target.checked" (set state.createIssue "showIntegrationData"))(action "refreshIntegrations")}}
+      >
+      <div class="label-text">
+        Add integration data as comment
+      </div>
+    </label>
+    
+    {{#if state.createIssue.showIntegrationData}}
+      <div class="write-container">
+        <div class="mt-2">
+          Data from selected integrations will be included as a comment on the Issue.
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="p-action {{if (eq state.createIssue.integrations.length 0) "invisible"}}" {{action "toggleAllIntegrations"}}>
+            Toggle All Integrations
+          </div>
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="p-footnote {{if (eq state.createIssue.integrations.length 0) "invisible"}}">
+              {{state.createIssue.numSelectedWriteIntegrations}} selected
+            </div>
+            <button class="btn ml-1 icon-btn p-action" {{action "refreshIntegrations"}} title="Refresh integrations">
+              {{fa-icon icon="sync" fixedWidth=true spin=state.createIssue.spinRefresh}}
+            </button>
+          </div>
+        </div>
+        <div
+          class="integration-labels-container {{if state.missingIntegrations "error-text"}} {{if state.isWriting "disabled"}}"
+        >
+          {{#each state.createIssue.integrations as | integration |}}
+            <label class="integration-write-label d-flex align-items-center">
+              <input
+                disabled={{state.createIssue.isCreatingIssue}}
+                type="checkbox"
+                checked={{integration.selected}}
+                onclick={{pipe-action (action (mut integration.selected) value="target.checked")(action "createIssueIntegrationSelected")}}
+              >
+              <div class="label-text">
+                {{integration.integrationName}}
+              </div>
+            </label>
+          {{/each}}
+          {{#if (eq state.createIssue.integrations.length 0)}}
+            <div>No integration data available.</div>
+            <div class="p-action mt-1" {{action "refreshIntegrations"}}>Click here to refresh integration data</div>
+          {{/if}}
+        </div>
+        <div class="integration-labels-description p-footnote {{if state.missingIntegrations "error-text"}}">
+          {{#if (eq state.integrations.length 0)}}
+            At least one integration must return data before you can submit evidence.
+          {{else}}
+            Select one or more integrations to use as Evidence
+          {{/if}}
+        </div>
+      </div>
+    {{/if}}           
+    <div class="mt-2">
+      <button class="btn btn-polarity" {{action "createIssue"}} disabled={{if (or (not displayIssueFields) state.createIssue.isCreatingIssue) true}}>
+        {{#if state.createIssue.isCreatingIssue}}
+          {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
+        {{else}}
+          Create
+        {{/if}}
+      </button>
+      <button class="btn btn-cancel" {{action (pipe-action (toggle "createIssue.showCreateIssue" state)(action "clearCreateIssueFields"))}} disabled={{if state.createIssue.isCreatingIssue true}}>Cancel</button>
+    </div>
+    {{!-- End Create Issue Integration Data --}}
+    
+    
     {{#if state.createIssue.errorMessage}}
       <div class="alert alert-danger error-message mt-2">
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -185,6 +243,13 @@
         Viewing {{filteredPagingData.length}} search results
       {{/if}}
     </div>
+    {{#if details.jql}}
+      <div>
+        <a class="p-link" href="{{jiraFqdn}}/issues/?jql={{details.jql}}">Search in Jira {{fa-icon icon="external-link"
+                                                                                                       fixedWidth=true
+                                                                                                       class="external-link-icon"}}</a>
+      </div>
+    {{/if}}
   </div>
 {{else}}
   <div class="p-footnote">
