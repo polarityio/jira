@@ -215,7 +215,20 @@ async function onMessage(payload, options, cb) {
             error: 'Adding comments is disabled for this integration'
           });
         }
-        const newComment = await addCommentToIssue(payload.issueId, payload.comment, options);
+        let newComment;
+        if (payload.includeIntegrationData) {
+          newComment = await addIntegrationDataToIssue(
+            payload.issueId,
+            payload.comment,
+            payload.entity,
+            payload.username,
+            payload.email,
+            payload.integrationData,
+            options
+          );
+        } else {
+          newComment = await addCommentToIssue(payload.issueId, payload.comment, options);
+        }
         cb(null, {
           comment: newComment
         });
@@ -265,7 +278,17 @@ async function onMessage(payload, options, cb) {
         }
         const issue = await addIssue(payload.projectId, payload.issueType, payload.fields, options);
         if (payload.includeIntegrationData) {
-          await addIntegrationDataToIssue(issue.id, payload.entity, payload.username, payload.email, payload.integrationData, options);
+          // No comment content is provided in the payload when adding data to a new issue
+          const comment = '';
+          await addIntegrationDataToIssue(
+            issue.id,
+            comment,
+            payload.entity,
+            payload.username,
+            payload.email,
+            payload.integrationData,
+            options
+          );
         }
         cb(null, {
           issue

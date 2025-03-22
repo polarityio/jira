@@ -81,7 +81,7 @@ function enrichFields(projectId, issueType, fields) {
   };
 
   fields.forEach((field) => {
-    if (field.schema && field.schema.system === 'description') {
+    if (field.schema && field.schema.system === 'description' && field.__value) {
       enrichedFields[field.key] = {
         content: [
           {
@@ -97,7 +97,7 @@ function enrichFields(projectId, issueType, fields) {
         type: 'doc',
         version: 1
       };
-    } else if (field.schema && field.schema.type === 'string') {
+    } else if (field.schema && field.schema.type === 'string' && field.__value) {
       enrichedFields[field.key] = field.__value;
     }
   });

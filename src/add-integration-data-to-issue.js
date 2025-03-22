@@ -14,7 +14,7 @@ const SUCCESS_CODES = [201];
  * @param options
  * @returns {Promise<*>}
  */
-async function addIntegrationDataToIssue(issueId, entity, username, userEmail, integrationData, options) {
+async function addIntegrationDataToIssue(issueId, comment, entity, username, userEmail, integrationData, options) {
   const Logger = getLogger();
 
   const requestOptions = {

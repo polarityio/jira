@@ -84,6 +84,14 @@ polarity.export = PolarityComponent.extend({
     console.info('JIRA Block Component Init', this.get('block'));
   },
   onDetailsLoaded() {
+    if (this.get('details.issues')) {
+      this.get('details.issues').forEach((issue, index) => {
+        if (!this.get(`details.issues.${index}.__state`)) {
+          this.set(`details.issues.${index}.__state`, {});
+        }
+      });
+    }
+
     // only called once when the details are loaded and not
     // on each init of the component (e.g., if you toggle the details
     // open and closed this is only called the first time the details is opened).
@@ -127,7 +135,7 @@ polarity.export = PolarityComponent.extend({
         transitionId
       };
 
-      this.set(`pagedPagingData.${issueIndex}.__updating`, true);
+      this.setIssueState(issueIndex, 'updating', true);
       this.sendIntegrationMessage(payload)
         .then((result) => {
           this.flashMessage(`Status updated to "${transitionName}"`, 'success');
@@ -138,17 +146,44 @@ polarity.export = PolarityComponent.extend({
           this.flashMessage(`Failed to update status`, 'error');
         })
         .finally(() => {
-          this.set(`pagedPagingData.${issueIndex}.__updating`, false);
+          this.setIssueState(issueIndex, 'updating', false);
         });
     },
     addComment(issueIndex, issueId, comment) {
-      this.set(`pagedPagingData.${issueIndex}.__updating`, true);
-      this.set(`pagedPagingData.${issueIndex}.__savingComment`, true);
+      if (!comment && !this.get(`pagedPagingData.${issueIndex}.__state.showIntegrationData`)) {
+        this.set(`pagedPagingData.${issueIndex}.__state.commentTextError`, `A comment is required`);
+        return;
+      }
+
+      const includeIntegrationData = this.get(`pagedPagingData.${issueIndex}.__state.showIntegrationData`);
+      let selectedIntegrations = [];
+      if (this.get(`pagedPagingData.${issueIndex}.__state.integrations`)) {
+        selectedIntegrations = this.get(`pagedPagingData.${issueIndex}.__state.integrations`).filter(
+          (integration) => integration.selected
+        );
+      }
+
+      if (includeIntegrationData && selectedIntegrations.length === 0) {
+        this.set(`pagedPagingData.${issueIndex}.__state.missingIntegrations`, true);
+        return;
+      }
+
+      this.setIssueState(issueIndex, 'updating', true);
+      this.setIssueState(issueIndex, 'savingComment', true);
       const payload = {
         action: 'ADD_COMMENT',
         issueId,
-        comment
+        comment,
+        includeIntegrationData,
+        username: this.currentUser.user.username,
+        email: this.currentUser.user.email,
+        entity: this.get('block.entity')
       };
+
+      if (payload.includeIntegrationData) {
+        payload.integrationData = selectedIntegrations;
+      }
+
       this.sendIntegrationMessage(payload)
         .then((result) => {
           this.flashMessage(`Successfully added comment`, 'success');
@@ -156,24 +191,24 @@ polarity.export = PolarityComponent.extend({
           comments.unshift(result.comment);
           // New array reference here triggers a template refresh
           this.set(`pagedPagingData.${issueIndex}.comments`, [...comments]);
-          this.set(`pagedPagingData.${issueIndex}.__commentText`, '');
-          this.set(`pagedPagingData.${issueIndex}.__showAddComment`, false);
+          this.setIssueState(issueIndex, 'commentText', '');
+          this.setIssueState(issueIndex, 'showAddComment', false);
         })
         .catch((err) => {
           console.error(err);
           this.flashMessage(`Failed to add comment`, 'danger');
         })
         .finally(() => {
-          this.set(`pagedPagingData.${issueIndex}.__updating`, false);
-          this.set(`pagedPagingData.${issueIndex}.__savingComment`, false);
+          this.setIssueState(issueIndex, 'updating', false);
+          this.setIssueState(issueIndex, 'savingComment', false);
         });
     },
     cancelComment(issueIndex) {
-      this.set(`pagedPagingData.${issueIndex}.__commentText`, '');
-      this.set(`pagedPagingData.${issueIndex}.__showAddComment`, false);
+      this.setIssueState(issueIndex, 'commentText', '');
+      this.setIssueState(issueIndex, 'showAddComment', false);
     },
     clearFlashMessage(issueIndex) {
-      this.set(`pagedPagingData.${issueIndex}.__flashMessage`, '');
+      this.setIssueState(issueIndex, 'flashMessage', '');
     },
     loadProjects() {
       this.clearErrors();
@@ -255,12 +290,13 @@ polarity.export = PolarityComponent.extend({
         return;
       }
       const includeIntegrationData = this.get('state.createIssue.showIntegrationData');
-      const selectedIntegrations = this.get('state.createIssue.integrations').filter(
-        (integration) => integration.selected
-      );
+      let selectedIntegrations = [];
+      if (this.get('state.createIssue.integrations')) {
+        selectedIntegrations = this.get('state.createIssue.integrations').filter((integration) => integration.selected);
+      }
 
       if (includeIntegrationData && selectedIntegrations.length === 0) {
-        this.set('state.createIssue.shortErrorMessage', 'No integrations selected');
+        this.set('state.createIssue.missingIntegrations', true);
         return;
       }
 
@@ -303,6 +339,9 @@ polarity.export = PolarityComponent.extend({
     createIssueIntegrationSelected() {
       this.setNumSelectedIntegrations();
     },
+    addCommentIntegrationSelected(issueIndex) {
+      this.setNumSelectedIntegrations(issueIndex);
+    },
     runSearchInPolarity(searchTerm) {
       //Run on demand search pivot, same as clicking the "Search Selected Node" button
       if (this.windowService.isClientWindow) {
@@ -313,35 +352,66 @@ polarity.export = PolarityComponent.extend({
         this.searchData.getSearchResults(searchTerm);
       }
     },
-    refreshIntegrations: function () {
-      this.set('state.createIssue.spinRefresh', true);
-      this.setIntegrationSelection();
+    refreshIntegrations: function (issueIndex) {
+      console.info('refreshing integrations', issueIndex);
+      if (issueIndex !== undefined) {
+        this.setIssueState(issueIndex, 'spinRefresh', true);
+      } else {
+        this.set('state.createIssue.spinRefresh', true);
+      }
+      this.setIntegrationSelection(issueIndex);
       setTimeout(() => {
         if (!this.isDestroyed) {
-          this.set('state.createIssue.spinRefresh', false);
+          if (issueIndex !== undefined) {
+            this.setIssueState(issueIndex, 'spinRefresh', false);
+          } else {
+            this.set('state.createIssue.spinRefresh', false);
+          }
         }
       }, 1000);
     },
     toggleAllIntegrations: function (issueIndex) {
-      const hasUnSelected = this.get('state.createIssue.integrations').some((integration) => !integration.selected);
+      let integrations;
+      if (issueIndex !== undefined) {
+        integrations = this.get(`pagedPagingData.${issueIndex}.__state.integrations`);
+      } else {
+        integrations = this.get('state.createIssue.integrations');
+      }
+
+      const hasUnSelected = integrations.some((integration) => !integration.selected);
       if (hasUnSelected) {
         // toggle all integrations on if at least one integration is not selected
-        this.get('state.createIssue.integrations').forEach((integration, index) => {
-          this.set(`state.createIssue.integrations.${index}.selected`, true);
+        integrations.forEach((integration, index) => {
+          if (issueIndex !== undefined) {
+            this.setIssueState(issueIndex, `integrations.${index}.selected`, true);
+          } else {
+            this.set(`state.createIssue.integrations.${index}.selected`, true);
+          }
         });
       } else {
         // all integrations are selected so toggle them all off
-        this.get('state.createIssue.integrations').forEach((integration, index) => {
-          this.set(`state.createIssue.integrations.${index}.selected`, false);
+        integrations.forEach((integration, index) => {
+          if (issueIndex !== undefined) {
+            this.setIssueState(issueIndex, `integrations.${index}.selected`, false);
+          } else {
+            this.set(`state.createIssue.integrations.${index}.selected`, false);
+          }
         });
       }
-      this.setNumSelectedIntegrations();
+      this.setNumSelectedIntegrations(issueIndex);
     }
   },
-  setNumSelectedIntegrations() {
-    let integrations = this.get('state.createIssue.integrations');
-    let numSelected = this.getNumSelectedIntegration(integrations);
-    this.set('state.createIssue.numSelectedWriteIntegrations', numSelected);
+  setNumSelectedIntegrations(issueIndex) {
+    let integrations;
+    if (issueIndex !== undefined) {
+      integrations = this.get(`pagedPagingData.${issueIndex}.__state.integrations`);
+      let numSelected = this.getNumSelectedIntegration(integrations);
+      this.setIssueState(issueIndex, 'numSelectedWriteIntegrations', numSelected);
+    } else {
+      integrations = this.get('state.createIssue.integrations');
+      let numSelected = this.getNumSelectedIntegration(integrations);
+      this.set('state.createIssue.numSelectedWriteIntegrations', numSelected);
+    }
   },
   getNumSelectedIntegration(integrations) {
     let selectedCount = 0;
@@ -386,6 +456,7 @@ polarity.export = PolarityComponent.extend({
     });
   },
   clearErrors() {
+    this.set('state.createIssue.missingIntegrations', false);
     this.set('state.createIssue.errorMessage', '');
     this.set('state.createIssue.errorTitle', '');
     const issueFields = this.get('state.createIssue.issueFields');
@@ -397,7 +468,7 @@ polarity.export = PolarityComponent.extend({
       });
     }
   },
-  setIntegrationSelection: function () {
+  setIntegrationSelection: function (issueIndex) {
     let integrationData = this.getIntegrationData();
     let annotations = this.getAnnotations();
     if (Array.isArray(annotations) && annotations.length > 0) {
@@ -407,8 +478,19 @@ polarity.export = PolarityComponent.extend({
         selected: false
       });
     }
-    this.set('state.createIssue.integrations', integrationData);
-    this.setNumSelectedIntegrations();
+    if (issueIndex !== undefined) {
+      this.setIssueState(issueIndex, 'integrations', integrationData);
+      this.setNumSelectedIntegrations(issueIndex);
+    } else {
+      this.set('state.createIssue.integrations', integrationData);
+      this.setNumSelectedIntegrations();
+    }
+  },
+  setIssueState: function (issueIndex, key, value) {
+    if (!this.get(`pagedPagingData.${issueIndex}.__state`)) {
+      this.set(`pagedPagingData.${issueIndex}.__state`, {});
+    }
+    this.set(`pagedPagingData.${issueIndex}.__state.${key}`, value);
   },
   getIntegrationData: function () {
     const notificationList = this.notificationsData.getNotificationList();

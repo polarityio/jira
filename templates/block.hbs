@@ -134,7 +134,7 @@
     {{#if state.createIssue.showIntegrationData}}
       <div class="write-container">
         <div class="mt-2">
-          Data from selected integrations will be included as a comment on the Issue.
+          Data from selected integrations will be included as a comment on the created Issue.
         </div>
         <div class="d-flex justify-content-between align-items-center">
           <div class="p-action {{if (eq state.createIssue.integrations.length 0) "invisible"}}" {{action "toggleAllIntegrations"}}>
@@ -150,7 +150,7 @@
           </div>
         </div>
         <div
-          class="integration-labels-container {{if state.missingIntegrations "error-text"}} {{if state.isWriting "disabled"}}"
+          class="integration-labels-container {{if state.createIssue.missingIntegrations "error-text"}} {{if state.isWriting "disabled"}}"
         >
           {{#each state.createIssue.integrations as | integration |}}
             <label class="integration-write-label d-flex align-items-center">
@@ -170,11 +170,11 @@
             <div class="p-action mt-1" {{action "refreshIntegrations"}}>Click here to refresh integration data</div>
           {{/if}}
         </div>
-        <div class="integration-labels-description p-footnote {{if state.missingIntegrations "error-text"}}">
-          {{#if (eq state.integrations.length 0)}}
+        <div class="integration-labels-description p-footnote {{if state.createIssue.missingIntegrations "error-text"}}">
+          {{#if (eq state.createIssue.integrations.length 0)}}
             At least one integration must return data before you can submit evidence.
           {{else}}
-            Select one or more integrations to use as Evidence
+            Select one or more integrations 
           {{/if}}
         </div>
       </div>
@@ -283,7 +283,7 @@
           {{issue.key}}
         </a>
       </h1>
-      {{#if issue.__updating}}
+      {{#if issue.__state.updating}}
         {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
       {{/if}}
     </div>
@@ -303,7 +303,7 @@
                 Status
               </div>
             </div>
-            <select disabled={{if (or issue.__updating state.isDetailsLoading) true}} onchange={{action (action "updateIssueTransition" issueIndex issue.id) value="target.value"}}>
+            <select disabled={{if (or issue.__state.updating state.isDetailsLoading) true}} onchange={{action (action "updateIssueTransition" issueIndex issue.id) value="target.value"}}>
               {{#each issue.transitions as | transition |}}
                 <option value="{{transition.id}}" selected={{eq transition.to.id issue.fields.status.id}}>
                   {{transition.name}}
@@ -437,8 +437,8 @@
       {{#if issue.renderedFields.description}}
         <li class="nav-item">
           <a
-            {{action (mut issue.__activeTab) "description"}}
-                  class="nav-link {{if (or (eq issue.__activeTab "description")(not issue.__activeTab)) "active"}}"
+            {{action (mut issue.__state.activeTab) "description"}}
+                  class="nav-link {{if (or (eq issue.__state.activeTab "description")(not issue.__state.activeTab)) "active"}}"
                   href="#"
           >
             Description
@@ -446,7 +446,11 @@
         </li>
       {{/if}}
       <li class="nav-item">
-        <a {{action (mut issue.__activeTab) "comments"}} class="nav-link {{if (eq issue.__activeTab "comments") "active"}}" href="#">
+        <a 
+          {{action (mut issue.__state.activeTab) "comments"}}
+          class="nav-link {{if (eq issue.__state.activeTab "comments") "active"}}"
+          href="#"
+        >
           Comments
           {{#if state.isDetailsLoading}}
             {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
@@ -458,93 +462,124 @@
     </ul>
 
     {{!-- Description Tab --}}
-    {{#if (or (eq issue.__activeTab "description")(not issue.__activeTab))}}
+    {{#if (or (eq issue.__state.activeTab "description")(not issue.__state.activeTab))}}
       <div class="mt-1">
         <span class="description jira-html">{{{issue.renderedFields.description}}}</span>
       </div>
     {{/if}}
   
     {{!-- Comments Tab --}}
-    {{#if (eq issue.__activeTab "comments")}}
+    {{#if (eq issue.__state.activeTab "comments")}}
       <div class="mt-1">
         {{#if (eq issue.comments.length 0)}}
           No Comments
         {{/if}}
         {{#let (get permissions issue.id) as | issuePermissions |}}
           {{#if (and issuePermissions.ADD_COMMENTS block.userOptions.enableAddingComments)}}
-            {{#unless issue.__showAddComment}}
+            {{#unless issue.__state.showAddComment}}
               <div class="add-comment-btn-container">
-                <span class="p-action" {{action (toggle "__showAddComment" issue)}}>
+                <span class="p-action" {{action (toggle "__state.showAddComment" issue)}}>
                   {{fa-icon icon="plus-circle"}} Add Comment
                 </span>
               </div>
             {{/unless}}
-            {{#if issue.__showAddComment}}
+            {{#if issue.__state.showAddComment}}
               <div class="add-comment-form-container mb-2">
-                <div class="mb-1">
-                  <textarea
-                    class="form-control" 
-                    rows="3" 
-                    value={{issue.__commentText}}
-                    onInput={{action (mut issue.__commentText) value="target.value"}}>                    
-                  </textarea>
+                <div class="input-container text-area-container {{if block._state.isSending "disabled"}} {{if issue.__state.commentTextError "error"}}">
+                  <label class="small">
+                    Comment
+                    {{#unless issue.__state.showIntegrationData}}
+                      <span class="required">*</span>
+                    {{/unless}}
+                  </label>
+                  {{textarea
+                    class="ifta-field"
+                    rows=3
+                    value=issue.__state.commentText
+                    disabled=state.createIssue.isCreatingIssue
+                    required=(if issue.__state.showIntegrationData false true)
+                  }}
                 </div>
-                {{!--
-                <div class="write-container">
+                {{#if issue.__state.commentTextError}}
+                  <div class="ifta-error-message">
+                    {{issue.__state.commentTextError}}
+                  </div>
+                {{/if}}
+                {{!-- Add Integration Data to Comment --}}
+                <label class="add-integration-data-label d-flex align-items-center">
+                  <input 
+                    disabled={{issue.__state.savingComment}}
+                    type="checkbox"
+                    checked={{issue.__state.showIntegrationData}}
+                    onclick={{pipe-action (pick "target.checked" (set issue.__state "showIntegrationData"))(action "refreshIntegrations" issueIndex)}}
+                  >
+                  <div class="label-text">
+                    Add integration data to comment
+                  </div>
+                </label>
+                {{#if issue.__state.showIntegrationData}}
+                  <div class="write-container">
                   <div class="mt-2">
-                    Data from selected integrations will be submitted as part of the comment in JSON format.
+                    Data from selected integrations will be appended to your comment on the Issue.
                   </div>
                   <div class="d-flex justify-content-between align-items-center">
-                    <div class="p-action {{if (eq state.integrations.length 0) "invisible"}}" {{action "toggleAllIntegrations"}}>
+                    <div class="p-action {{if (eq issue.__state.integrations.length 0) "invisible"}}" {{action "toggleAllIntegrations" issueIndex}}>
                       Toggle All Integrations
                     </div>
                     <div class="d-flex align-items-center justify-content-between">
-                      <div class="p-footnote {{if (eq state.integrations.length 0) "invisible"}}">
-                        {{numSelectedWriteIntegrations}} selected
+                      <div class="p-footnote {{if (eq issue.__state.integrations.length 0) "invisible"}}">
+                        {{issue.__state.numSelectedWriteIntegrations}} selected
                       </div>
-                      <button class="btn ml-1 icon-btn p-action" {{action "refreshIntegrations"}} title="Refresh integrations">
-                        {{fa-icon icon="sync" fixedWidth=true spin=state.spinRefresh}}
+                      <button class="btn ml-1 icon-btn p-action" {{action "refreshIntegrations" issueIndex}} title="Refresh integrations">
+                        {{fa-icon icon="sync" fixedWidth=true spin=issue.__state.spinIntegrationRefresh}}
                       </button>
                     </div>
                   </div>
                   <div
-                    class="integration-labels-container {{if state.missingIntegrations "error-text"}} {{if state.isWriting "disabled"}}"
+                    class="integration-labels-container {{if issue.__state.missingIntegrations "error-text"}} {{if issue.__state.isWriting "disabled"}}"
                   >
-                    {{#each state.integrations as | integration |}}
+                    {{#each issue.__state.integrations as | integration |}}
                       <label class="integration-write-label d-flex align-items-center">
                         <input
-                                disabled={{state.isWriting}}
-                                type="checkbox"
-                                checked={{integration.selected}}
-                                onclick={{action (mut integration.selected) value="target.checked"}}
+                          disabled={{issue.__state.isWriting}}
+                          type="checkbox"
+                          checked={{integration.selected}}
+                          onclick={{pipe-action (action (mut integration.selected) value="target.checked")(action "addCommentIntegrationSelected" issueIndex)}}
                         >
                         <div class="label-text">
                           {{integration.integrationName}}
                         </div>
                       </label>
                     {{/each}}
-                    {{#if (eq state.integrations.length 0)}}
+                    {{#if (eq issue.__state.integrations.length 0)}}
                       <div>No integration data available.</div>
-                      <div class="p-action mt-1" {{action "refreshIntegrations"}}>Click here to refresh integration data</div>
+                      <div class="p-action mt-1" {{action "refreshIntegrations" issueIndex}}>Click here to refresh integration data</div>
                     {{/if}}
                   </div>
-                  <div class="integration-labels-description p-footnote {{if state.missingIntegrations "error-text"}}">
-                    {{#if (eq state.integrations.length 0)}}
-                      At least one integration must return data before you can submit evidence.
+                  <div class="integration-labels-description p-footnote {{if issue.__state.missingIntegrations "error-text"}}">
+                    {{#if (eq issue.__state.integrations.length 0)}}
+                      At least one integration must return data before you can submit integration data.
                     {{else}}
-                      Select one or more integrations to use as Evidence
+                      Select one or more integrations
                     {{/if}}
                   </div>
                 </div>
-                --}}
-                <button class="btn btn-polarity" {{action "addComment" issueIndex issue.id issue.__commentText}} disabled={{if (or (not issue.__commentText) state.isDetailsLoading issue.__savingComment) true}}>
-                  {{#if issue.__savingComment}}
-                    {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
-                  {{else}}
-                    Save
-                  {{/if}}
-                </button>
-                <button class="btn btn-cancel" {{action "cancelComment" issueIndex}} disabled={{if issue.__savingComment true}}>Cancel</button>
+                {{/if}}
+                {{!-- End Integration Data to Comment --}}
+                <div class="mt-2">
+                  <button 
+                    class="btn btn-polarity" 
+                    {{action "addComment" issueIndex issue.id issue.__state.commentText}} 
+                    disabled={{if (or state.isDetailsLoading issue.__state.savingComment) true}}
+                  >
+                    {{#if issue.__state.savingComment}}
+                      {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
+                    {{else}}
+                      Save
+                    {{/if}}
+                  </button>
+                  <button class="btn btn-cancel" {{action "cancelComment" issueIndex}} disabled={{if issue.__state.savingComment true}}>Cancel</button>
+                </div>
               </div>
             {{/if}}
           {{/if}}
@@ -573,9 +608,9 @@
     {{/if}}
     
     {{!-- flashMessage container --}}
-    {{#if issue.__flashMessage}}
-      <div class="flash-message-container {{issue.__flashMessageType}}">
-        <div>{{issue.__flashMessage}}</div>
+    {{#if issue.__state.flashMessage}}
+      <div class="flash-message-container {{issue.__state.flashMessageType}}">
+        <div>{{issue.__state.flashMessage}}</div>
         <button type="button" class="close" {{action "clearFlashMessage" issueIndex}}>
           <span aria-hidden="true">&times;</span>
         </button>
