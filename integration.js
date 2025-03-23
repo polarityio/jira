@@ -1,16 +1,26 @@
 'use strict';
-const request = require('postman-request');
 const _ = require('lodash');
 const { get, filter, flow, split, map, trim, compact, uniq, size, some } = require('lodash/fp');
 const async = require('async');
-const fs = require('fs');
-const config = require('./config/config');
 const crypto = require('crypto');
-const { getDefangedPermutations } = require('./lib/defanger');
+const { getStatusesForProject } = require('./src/get-statuses-for-project');
+const { getIssueById } = require('./src/get-issue-by-id');
+const { searchIssues } = require('./src/search-issues');
+const { createResultObject } = require('./src/create-result-object');
+const { getCommentsByIssueId } = require('./src/get-comments-by-issue-id');
+const { downloadIconByUrl } = require('./src/download-icon-by-url');
+const { updateIssueTransition } = require('./src/update-issue-transition');
+const { getBulkPermissions } = require('./src/get-bulk-permissions');
+const { addCommentToIssue } = require('./src/add-comment-to-issue');
+const { getProjects } = require('./src/get-projects.js');
+const { getIssueTypesByProject } = require('./src/get-issue-types-by-project.js');
+const { addIntegrationDataToIssue } = require('./src/add-integration-data-to-issue');
+const { addIssue } = require('./src/add-issue.js');
+const { setLogger } = require('./src/logger');
+const { getIssueFields } = require('./src/get-issue-fields');
 
 let log = null;
-let requestWithDefaults;
-let requestAsync;
+
 // Project and Task icons require authentication to display so we fetch them and store them here
 // This way we only fetch the icon the first time we see it.  The cache is keyed on the URL of the
 // icon and the value is the icon data base64 encoded.
@@ -18,40 +28,13 @@ const iconCache = {};
 
 function startup(logger) {
   log = logger;
-  let defaults = {};
-  if (typeof config.request.cert === 'string' && config.request.cert.length > 0) {
-    defaults.cert = fs.readFileSync(config.request.cert);
-  }
-  if (typeof config.request.key === 'string' && config.request.key.length > 0) {
-    defaults.key = fs.readFileSync(config.request.key);
-  }
-  if (typeof config.request.passphrase === 'string' && config.request.passphrase.length > 0) {
-    defaults.passphrase = config.request.passphrase;
-  }
-  if (typeof config.request.ca === 'string' && config.request.ca.length > 0) {
-    defaults.ca = fs.readFileSync(config.request.ca);
-  }
-  if (typeof config.request.proxy === 'string' && config.request.proxy.length > 0) {
-    defaults.proxy = config.request.proxy;
-  }
-  if (typeof config.request.rejectUnauthorized === 'boolean') {
-    defaults.rejectUnauthorized = config.request.rejectUnauthorized;
-  }
-  requestWithDefaults = request.defaults(defaults);
-  requestAsync = (requestOptions) =>
-    new Promise((resolve, reject) => {
-      requestWithDefaults(requestOptions, (err, res, body) => {
-        if (err) return reject(err);
-        resolve(res);
-      });
-    });
+  setLogger(logger);
 }
 
 const splitCommaSeparatedUserOption = (key, options) => flow(get(key), split(','), map(trim), compact, uniq)(options);
 
-function doLookup(entities, options, cb) {
-  let lookupIssues = [];
-
+async function doLookup(entities, options, cb) {
+  let lookupResults = [];
   const ignoreEntities = splitCommaSeparatedUserOption('ignoreList', options);
   const ignoreEntitiesRegex = splitCommaSeparatedUserOption('ignoreListRegex', options);
   const entitiesWithoutIgnored =
@@ -70,245 +53,35 @@ function doLookup(entities, options, cb) {
 
   log.trace({ entities, entitiesWithoutIgnored }, 'doLookup');
 
-  async.each(
-    entitiesWithoutIgnored,
-    function (entityObj, next) {
-      const queryFunction =
-        entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0 ? _lookupEntityIssue : _lookupEntity;
-
-      queryFunction(entityObj, options, function (err, issue) {
-        if (err) return next(err);
-        lookupIssues.push(issue);
-        next(null);
-      });
-    },
-    function (err) {
-      //log.trace({ lookupIssues }, 'doLookup Results');
-      cb(err, lookupIssues);
-    }
-  );
-}
-
-function getAuthHeaders(options) {
-  if (options.userName && options.apiKey) {
-    // If a userName and apiKey are provided then we are authenticating to Jira Cloud
-    return {
-      auth: {
-        username: options.userName,
-        password: options.apiKey
+  try {
+    await async.each(entitiesWithoutIgnored, async (entityObj, next) => {
+      let apiResponse;
+      if (entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0) {
+        apiResponse = await getIssueById(entityObj.value, options);
+      } else {
+        apiResponse = await searchIssues(entityObj, options);
       }
-    };
-  } else if (options.apiKey) {
-    // if just an apiKey is provided then we are authenticating to Jira Server
-    return {
-      headers: {
-        Authorization: `Bearer ${options.apiKey}`
-      }
-    };
-  }
-}
-
-function _lookupEntityIssue(entityObj, options, cb) {
-  let uri = options.baseUrl + '/rest/api/2/issue/' + entityObj.value;
-  requestWithDefaults(
-    {
-      uri: uri,
-      method: 'GET',
-      followAllRedirects: true,
-      json: true,
-      ...getAuthHeaders(options)
-    },
-    function (err, response, body) {
-      // check for a request error
-      if (err) {
-        cb({
-          detail: 'Error Making HTTP Request',
-          debug: err
-        });
-        return;
-      }
-
-      // If we get a 404 then cache a miss
-      if (response.statusCode === 404) {
-        cb(null, {
-          entity: entityObj,
-          data: null // setting data to null indicates to the server that this entity lookup was a "miss"
-        });
-        return;
-      }
-
-      if (response.statusCode === 400) {
-        cb(null, {
-          entity: entityObj,
-          data: null // setting data to null indicates to the server that this entity lookup was a "miss"
-        });
-        return;
-      }
-
-      if (response.statusCode !== 200) {
-        cb({
-          detail: 'Unexpected HTTP Status Code Received',
-          debug: body
-        });
-        return;
-      }
-
-      log.debug({ body: body }, 'Checking Null issues for body');
-
-      if (_.isNull(body) || _.isEmpty(body.id)) {
-        cb(null, {
-          entity: entityObj,
-          data: null // setting data to null indicates to the server that this entity lookup was a "miss"
-        });
-        return;
-      }
-
-      // The lookup issues returned is an array of lookup objects with the following format
-      cb(null, {
-        // Required: This is the entity object passed into the integration doLookup method
-        entity: entityObj,
-        // Required: An object containing everything you want passed to the template
-        data: {
-          // Required: These are the tags that are displayed in your template
-          summary: getIssueSummaryTags(body),
-          // Data that you want to pass back to the notification window details block
+      const resultObject = createResultObject(entityObj, apiResponse, options);
+      if (resultObject.data === null && options.enableCreatingIssues.value === 'enabledAlways') {
+        // no result
+        resultObject.requireOtherData = true;
+        resultObject.data = {
+          summary: ['Create Issue'],
           details: {
-            issues: [body]
+            noResults: true
           }
-        }
-      });
-    }
-  );
-}
+        };
+      }
 
-function getIssueSummaryTags(issue) {
-  const tags = [];
-  tags.push(`Ticket Status: ${_.get(issue, 'fields.status.name', 'Unknown')}`);
-  tags.push(`Issue Type: ${_.get(issue, 'fields.issuetype.name', 'Unknown')}`);
-  tags.push(_.get(issue, 'fields.summary', 'No Summary'));
-  if (_.get(issue, 'fields.assignee.displayName')) {
-    tags.push(`Assignee: ${_.get(issue, 'fields.assignee.displayName')}`);
-  }
-  return tags;
-}
-
-function createJqlQuery(entities, options) {
-  let jqlQuery = 'text ~ "';
-  for (let i = 0; i < entities.length - 1; i++) {
-    jqlQuery += `\\"${entities[i]}\\" OR `;
-  }
-  jqlQuery += `\\"${entities[entities.length - 1]}\\""`;
-
-  if (options.projectsToSearch.trim().length > 0) {
-    let quotedProjects = options.projectsToSearch.split(',').map((project) => `project="${project.trim()}"`);
-    jqlQuery += ` AND (${quotedProjects.join(' OR ')})`;
+      lookupResults.push(resultObject);
+    });
+  } catch (error) {
+    return cb(error);
   }
 
-  jqlQuery += ' ORDER BY updated DESC';
+  log.trace({ lookupResults }, 'doLookup results');
 
-  return jqlQuery;
-}
-
-function _lookupEntity(entityObj, options, cb) {
-  // TODO: Investigate ways to support defanged entities.  Leaving this code as it covers some of the
-  // methods we've tried so far
-
-  // brackets are special characters so we need to escape them
-  // const defangedEntities = getDefangedPermutations(entityObj.value, '.', ['.', '\\\\[.\\\\]']);
-  // // Searches in Jira are case insensitive
-  // //
-  // // If the rawValue does not match the value (ignoring case since searches are case insensitive)
-  // // then it is most likely a defanged entity so we want to search on the escaped rawValue and the fanged entity value.
-  // // See: https://confluence.atlassian.com/jirasoftwareserver/advanced-searching-939938733.html
-  // // under the section "Restricted words and characters" for how to escape special characters. In our case
-  // // we need to escape [ ] { } ( ) (open and close brackets, braces, and parens).
-  // if (entityObj.value.toLowerCase() !== entityObj.rawValue.toLowerCase()) {
-  //   //let escapedDefangedValue = entityObj.rawValue.replace(/([\[\]{}()])/g, '\\\\$&');
-  //   let escapedDefangedValue = entityObj.rawValue.replace(/([\[\]{}()])/g, '*');
-  //   jqlQuery = `text ~ "\\"${entityObj.value}\\" OR \\"${escapedDefangedValue}\\"" ORDER BY updated DESC`;
-  // } else {
-  //   jqlQuery = `text ~ "\\"${entityObj.value}\\"" ORDER BY updated DESC`;
-  // }
-
-  let jqlQuery = createJqlQuery([entityObj.value], options);
-
-  log.trace({ jqlQuery }, 'JQL Query');
-
-  requestWithDefaults(
-    {
-      method: 'GET',
-      uri: `${options.baseUrl}/rest/api/2/search`,
-      qs: { jql: jqlQuery },
-      followAllRedirects: true,
-      json: true,
-      ...getAuthHeaders(options)
-    },
-    async (err, response, body) => {
-      log.trace({ jqlQuery, body, err, status: response ? response.statusCode : 'N/A' }, 'JQL Query and Result');
-
-      // check for a request error
-      if (err) {
-        log.error(err, 'Error making HTTP Request');
-        cb({
-          detail: 'Error Making HTTP Request',
-          debug: err
-        });
-        return;
-      }
-
-      // 400 errors can be triggered by invalid JQL
-      if (response.statusCode === 400) {
-        cb({
-          body,
-          statusCode: response.statusCode
-        });
-        return;
-      }
-
-      // If we get a 404 then cache a miss
-      if (response.statusCode === 404) {
-        cb(null, {
-          entity: entityObj,
-          data: null // setting data to null indicates to the server that this entity lookup was a "miss"
-        });
-        return;
-      }
-
-      if (response.statusCode !== 200) {
-        cb({
-          detail: 'Unexpected HTTP Status Code Received',
-          debug: body
-        });
-        return;
-      }
-
-      let details = body;
-
-      if (_.isNull(details) || _.isEmpty(details.issues)) {
-        cb(null, {
-          entity: entityObj,
-          data: null // setting data to null indicates to the server that this entity lookup was a "miss"
-        });
-        return;
-      }
-
-      // Include the jql so we can provide a search link in the template
-      details.jql = jqlQuery;
-
-      // The lookup issues returned is an array of lookup objects with the following format
-      cb(null, {
-        // Required: This is the entity object passed into the integration doLookup method
-        entity: entityObj,
-        // Required: An object containing everything you want passed to the template
-        data: {
-          // Required: These are the tags that are displayed in your template
-          summary: [`Number of Issues: ${details.total}`],
-          // Data that you want to pass back to the notification window details block
-          details
-        }
-      });
-    }
-  );
+  cb(null, lookupResults);
 }
 
 function computeMd5(data) {
@@ -362,7 +135,7 @@ async function getRequiredIcons(issues, options) {
   const requiredIcons = {};
   for await (let [md5, url] of iconUrlMap) {
     if (!iconCache[url]) {
-      iconCache[url] = await getIcon(url, options);
+      iconCache[url] = await downloadIconByUrl(url, options);
     }
     requiredIcons[md5] = iconCache[url];
   }
@@ -371,9 +144,19 @@ async function getRequiredIcons(issues, options) {
 }
 
 async function onDetails(resultObject, options, cb) {
+  if (resultObject.data.details.noResults) {
+    return cb(null, resultObject.data);
+  }
+
   try {
-    resultObject.data.details.issues = await getCommentsAndAddToIssues(resultObject.data.details, options);
+    resultObject.data.details.issues = await getCommentsAndAddToIssues(resultObject.data.details.issues, options);
     resultObject.data.details.icons = await getRequiredIcons(resultObject.data.details.issues, options);
+    resultObject.data.details.permissions = await getBulkPermissions(
+      resultObject.data.details.issues.map((issue) => issue.id),
+      options
+    );
+
+    log.trace({ resultObject }, 'onDetails result');
 
     cb(null, resultObject.data);
   } catch (e) {
@@ -394,46 +177,149 @@ function errorToPojo(err, detail) {
     : err;
 }
 
-/**
- * Fetches the icon (image) from the given URL and converts it into a base64 encoded image
- * that can be rendered in an <img> tag.
- *
- * Since icons can be different formats (PNG, SVG, GIF etc.), we use the content-type of the response header
- * to set the data type in the base64 encoded string.
- *
- * @param iconUrl
- * @param options
- * @returns {Promise<string>}
- */
-async function getIcon(iconUrl, options) {
-  const response = await requestAsync({
-    method: 'GET',
-    uri: iconUrl,
-    followAllRedirects: true,
-    encoding: null,
-    ...getAuthHeaders(options)
+async function getCommentsAndAddToIssues(issues, options) {
+  await async.eachLimit(issues, 10, async (issue) => {
+    const body = await getCommentsByIssueId(issue.id, options);
+    issue.comments = body.comments;
   });
 
-  return `data:${response.headers['content-type']};base64,${Buffer.from(response.body, 'binary').toString('base64')}`;
+  log.trace({ issues }, 'Issues with comments');
+  return issues;
 }
 
-const getCommentsAndAddToIssues = async (body, options) => {
-  const issues = get('issues', body);
-
-  await async.eachLimit(issues, 10, async (issue) => {
-    const result = await requestAsync({
-      method: 'GET',
-      uri: `${options.baseUrl}/rest/api/2/issue/${issue.id}/comment`,
-      followAllRedirects: true,
-      json: true,
-      ...getAuthHeaders(options)
-    });
-    issue.comments = result.body.comments;
-  });
-
-  //log.trace({ issues }, 'Issues with comments');
-  return issues;
-};
+async function onMessage(payload, options, cb) {
+  log.trace({ payload }, 'onMessage');
+  switch (payload.action) {
+    case 'UPDATE_TRANSITION':
+      try {
+        if (!options.enableUpdatingStatus) {
+          return cb({
+            error: 'Updating Issue status is disabled for this integration'
+          });
+        }
+        await updateIssueTransition(payload.issueId, payload.transitionId, options);
+        const body = await getIssueById(payload.issueId, options);
+        const status = body.issues[0].fields.status;
+        cb(null, {
+          status
+        });
+      } catch (e) {
+        log.error(e, 'Error updating transitions');
+        cb(errorToPojo(e, 'Error updating transitions'));
+      }
+      break;
+    case 'ADD_COMMENT':
+      try {
+        if (!options.enableAddingComments) {
+          return cb({
+            error: 'Adding comments is disabled for this integration'
+          });
+        }
+        let newComment;
+        if (payload.includeIntegrationData) {
+          newComment = await addIntegrationDataToIssue(
+            payload.issueId,
+            payload.comment,
+            payload.entity,
+            payload.username,
+            payload.email,
+            payload.integrationData,
+            options
+          );
+        } else {
+          newComment = await addCommentToIssue(payload.issueId, payload.comment, options);
+        }
+        cb(null, {
+          comment: newComment
+        });
+      } catch (e) {
+        log.error(e, 'Error adding comment');
+        cb(errorToPojo(e, 'Error adding comment'));
+      }
+      break;
+    case 'GET_PROJECTS':
+      try {
+        if (options.enableCreatingIssues.value === 'disabled') {
+          return cb({
+            error: 'Adding issues is disabled for this integration'
+          });
+        }
+        const projects = await getProjects(options);
+        cb(null, {
+          projects
+        });
+      } catch (e) {
+        log.error(e, 'Error getting Projects');
+        cb(errorToPojo(e, 'Error getting Projects'));
+      }
+      break;
+    case 'GET_ISSUE_TYPES':
+      try {
+        if (options.enableCreatingIssues.value === 'disabled') {
+          return cb({
+            error: 'Adding issues is disabled for this integration'
+          });
+        }
+        const issueTypes = await getIssueTypesByProject(payload.projectId, options);
+        cb(null, {
+          issueTypes
+        });
+      } catch (e) {
+        log.error(e, 'Error getting issue types');
+        cb(errorToPojo(e, 'Error getting issue types'));
+      }
+      break;
+    case 'ADD_ISSUE':
+      try {
+        if (options.enableCreatingIssues.value === 'disabled') {
+          return cb({
+            error: 'Adding issues is disabled for this integration'
+          });
+        }
+        const issue = await addIssue(payload.projectId, payload.issueType, payload.fields, options);
+        if (payload.includeIntegrationData) {
+          // No comment content is provided in the payload when adding data to a new issue
+          const comment = '';
+          await addIntegrationDataToIssue(
+            issue.id,
+            comment,
+            payload.entity,
+            payload.username,
+            payload.email,
+            payload.integrationData,
+            options
+          );
+        }
+        cb(null, {
+          issue
+        });
+      } catch (e) {
+        log.error(e, 'Error creating issue');
+        cb(errorToPojo(e, 'Error creating issue'));
+      }
+      break;
+    case 'GET_ISSUE_FIELDS':
+      try {
+        if (options.enableCreatingIssues.value === 'disabled') {
+          return cb({
+            error: 'Adding issues is disabled for this integration'
+          });
+        }
+        const issueFields = await getIssueFields(payload.projectId, payload.issueType, options);
+        cb(null, {
+          issueFields
+        });
+      } catch (e) {
+        log.error(e, 'Error getting issue field meta');
+        cb(errorToPojo(e, 'Error getting issue field meta'));
+      }
+      break;
+    default:
+      cb({
+        error: 'Invalid Action Provided'
+      });
+  }
+}
 
 function validateOptions(userOptions, cb) {
   let errors = [];
@@ -457,18 +343,14 @@ function validateOptions(userOptions, cb) {
     });
   }
 
-  if (
-      (typeof userOptions.baseUrl.value === 'string' && userOptions.baseUrl.value.endsWith('/'))
-  ) {
+  if (typeof userOptions.baseUrl.value === 'string' && userOptions.baseUrl.value.endsWith('/')) {
     errors.push({
       key: 'baseUrl',
       message: 'Jira API URL cannot end with a trailing slash ("/")'
     });
   }
 
-  if (
-      (typeof userOptions.baseAppUrl.value === 'string' && userOptions.baseAppUrl.value.endsWith('/'))
-  ) {
+  if (typeof userOptions.baseAppUrl.value === 'string' && userOptions.baseAppUrl.value.endsWith('/')) {
     errors.push({
       key: 'baseAppUrl',
       message: 'Jira Application URL cannot end with a trailing slash ("/")'
@@ -482,5 +364,6 @@ module.exports = {
   doLookup,
   startup,
   validateOptions,
-  onDetails
+  onDetails,
+  onMessage
 };

@@ -5,15 +5,85 @@
  directory.
 */
 
+
+@red: #FF4559;
+@green: #7bc942;
+@dark-green: #63a830;
+
 .tags {
   margin-top: 5px;
 
   .pulse-tag {
-    background-color: #dedede;
+    background-color: #e4e9f2;
     border-radius: 4px;
     margin-bottom: 2px;
     padding: 3px;
     display: inline-block;
+  }
+}
+
+.select-loading-spinner {
+  position: absolute;
+  left: 10px;
+  top: 19px;
+  color: #bbb;
+}
+
+.create-issue-container {
+  border: 1px solid #e4e9f2;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  padding: 5px;
+}
+
+.issue-container {
+  border: 1px solid #e4e9f2;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  padding: 5px;
+  position: relative;
+
+  .status-select {
+    border: 1px solid #e4e9f2;
+    border-radius: 4px;
+    display: inline-flex;
+
+    .label {
+      border-right: 1px solid #e4e9f2;
+    }
+  }
+
+  select {
+    border: none;
+  }
+
+  &:last-child {
+    margin-bottom: 0px;
+  }
+
+  .flash-message-container {
+    position: absolute;
+    border-radius: 4px;
+    padding: 3px 10px 3px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(100% - 10px);
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+
+    &.info {
+      background-color: #e4e9f2;
+    }
+
+    &.success {
+      background-color: #d4edda;
+    }
+
+    &.error {
+      background-color: #f8d7da;
+    }
   }
 }
 
@@ -35,23 +105,158 @@
   margin-bottom: 1px;
 }
 
+.jira-html {
+  ul, ol {
+    padding-left: 5px;
+    list-style-position: inside;
+  }
 
-.comments-container {
-  padding-left: 10px;
-  border-left: 2px solid #dee2e6;
+  div.panelContent {
+    padding: 4px;
 
-  .comment-wrapper {
-    white-space: pre-wrap;
-    max-height: 100px;
-    overflow-y: scroll;
-    border: 1px solid #dee2e6;
-    border-radius: 3px;
-    padding: 3px;
-    width: 100%;
-    resize: vertical;
-    word-wrap: break-word;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    p:last-child {
+      margin-bottom: 0px;
+    }
+  }
+
+  pre {
+    background-color: #eee;
+    padding: 5px;
+  }
+
+  // Used for inline code
+  tt {
+    background-color: #e4e9f2;
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+
+  h1 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  h2 {
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  h4 {
+    font-size: 13px;
+  }
+
+  h5 {
+    font-size: 13px
+  }
+
+  b {
+    font-weight: 600;
+  }
+
+  blockquote {
+    border-left: 2px solid #e4e9f2;
+    padding-left: 5px;
+    margin: 0;
+  }
+
+  p {
+    margin-bottom: 5px;
+  }
+
+
+  table {
     font-size: 12px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    max-height: 500px;
+    margin-bottom: 10px;
+    line-height: 1em;
+
+    th {
+      //display: none;
+      padding: 5px;
+
+      b {
+        font-weight: 500;
+      }
+    }
+
+    tbody {
+      td {
+        border-bottom: 1px solid rgb(217, 217, 217);
+      }
+
+      tr:nth-child(odd) {
+        background-color: #fff;
+      }
+
+      tr:last-child {
+        td {
+          border-bottom: none;
+        }
+      }
+
+      td:first-child {
+        min-width: 35%;
+        width: 35%;
+      }
+    }
+  }
+}
+
+
+.add-comment-btn-container {
+  display: flex;
+  justify-content: flex-end;
+  margin: 0px 0px 10px 0px;
+}
+
+.btn {
+  height: 25px;
+  font-weight: 500;
+  font-size: 12px;
+  width: 70px;
+}
+
+.icon-btn {
+  width: auto !important;
+}
+
+.btn-cancel {
+  background-color: transparent;
+}
+
+.add-comment-form-container {
+  textarea {
+    font-size: 12px;
+  }
+}
+
+.comment-container {
+  overflow-y: scroll;
+  border: 1px solid #dee2e6;
+  border-radius: 3px;
+  padding: 3px;
+  width: 100%;
+  resize: vertical;
+  word-wrap: break-word;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 12px;
+  margin-bottom: 10px;
+  max-height: 200px;
+  padding-right: 5px;
+
+  &[style*="height"] {
+    max-height: unset;
+  }
+
+  &:last-child {
+    margin-bottom: 0px;
   }
 }
 
@@ -62,9 +267,14 @@
 }
 
 .title-icon {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 2px;
+}
+
+.user-avatar-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .summary {
@@ -75,14 +285,263 @@
 }
 
 .description {
-  white-space: pre-wrap;
   word-wrap: break-word;
   display: block;
   max-height: 200px;
   overflow-y: auto;
-  border: 1px solid #dee2e6;
-  padding: 3px;
-  border-radius: 3px;
   resize: vertical;
   margin-top: 3px;
+  padding-right: 5px;
+
+  &[style*="height"] {
+    max-height: unset;
+  }
 }
+
+.add-integration-data-label {
+  cursor: pointer;
+  padding: 3px;
+  margin: 0px;
+  border-radius: 4px;
+
+  .label-text {
+    padding-left: 5px;
+  }
+
+  &:hover {
+    background-color: #eee;
+  }
+}
+
+.write-container {
+  .integration-labels-description {
+    margin: 5px 0px 0px 3px;
+  }
+
+  .integration-labels-container {
+    max-height: 200px;
+    overflow-y: scroll;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 4px;
+    resize: vertical;
+
+    &.disabled {
+      background-color: #f6f6f2;
+    }
+
+    .integration-write-label {
+      cursor: pointer;
+      padding: 3px;
+      margin: 0px;
+      border-radius: 4px;
+
+      .label-text {
+        padding-bottom: 2px;
+        padding-left: 5px;
+      }
+
+      &:hover {
+        background-color: #eee;
+      }
+    }
+  }
+}
+
+.issue-created-container {
+  border-radius: 4px;
+  border: 1px solid #e4e9f2;
+  padding: 5px;
+  margin-bottom: 10px
+}
+
+.error-text {
+  color: @red !important;
+  border-color: @red !important;
+}
+
+/* Beginning of Form Styles */
+.input-container {
+  width: 100%;
+  position: relative;
+  margin-bottom: 12px;
+  margin-top: 5px;
+
+  &.text-area-container {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    z-index: 1;
+
+    &:focus-within {
+      -webkit-appearance: none;
+      outline: none;
+      color: #000000;
+      border-color: @green;
+      box-shadow: 0 0 0 0.2rem rgba(123, 201, 66, 0.25);
+    }
+
+    &.error {
+      border-color: @red;
+
+      &:focus-within {
+        border-color: @green !important;
+      }
+    }
+
+    textarea {
+      margin: 0px 10px 10px 10px;
+      border: none;
+      outline: none;
+      box-shadow: none;
+      padding: 0px;
+      width: calc(100% - 20px);
+
+      &.ifta-field:focus {
+        -webkit-appearance: none;
+        outline: none;
+        box-shadow: none;
+      }
+    }
+
+    label {
+      padding: 3px 10px 5px;
+      margin: 0px;
+    }
+  }
+
+  label {
+    display: block;
+
+    .required {
+      color: @red;
+    }
+  }
+
+  textarea::placeholder, input::placeholder {
+    color: #dfdfdf;
+  }
+
+  textarea:focus::placeholder, input:focus::placeholder {
+    color: transparent;
+  }
+
+  input {
+    cursor: text;
+  }
+
+  .ifta-label {
+    margin-bottom: -15px;
+    z-index: 1;
+    position: relative;
+    padding: 0px 10px 0 10px;
+    pointer-events: none;
+  }
+
+  .ifta-field {
+    border: 0;
+    border-radius: 6px;
+    padding: 15px 10px 5px;
+    margin: 0px;
+    width: 100%;
+    border: 1px solid #ccc;
+    line-height: 12px;
+    height: 38px;
+
+    &.error {
+      border-color: @red;
+    }
+  }
+
+  .ifta-field:focus {
+    -webkit-appearance: none;
+    outline: none;
+    color: #000000;
+    border-color: @green;
+    box-shadow: 0 0 0 0.2rem rgba(123, 201, 66, 0.25);
+  }
+
+  select.ifta-field {
+    -webkit-appearance: none;
+    outline: none;
+    line-height: 16px;
+  }
+
+  &:focus-within label {
+    color: @dark-green !important;
+  }
+
+  .select-arrow {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+  }
+
+  input:disabled, select:disabled, textarea:disabled, &.text-area-container.disabled {
+    background-color: #f6f6f3 !important;
+  }
+}
+
+/* End of Form Styles */
+
+.ifta-error-message {
+  padding: 0;
+  color: red;
+  margin-top: -13px;
+  font-size: 10px;
+  margin-left: 5px;
+}
+
+.error-message {
+  padding: 10px;
+
+  .error-message-title {
+    font-weight: 500;
+  }
+
+  .close-icon {
+    cursor: pointer;
+  }
+
+  .error-scrolling-container {
+    overflow-y: scroll;
+    overflow-x: auto;
+    max-height: 200px;
+
+    pre {
+      margin: 0px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  }
+}
+
+/* Beginning of Paging Styles */
+.paging-bar {
+  display: flex;
+  align-items: center;
+  padding: 5px 0px 5px 0px;
+  justify-content: space-between;
+  position: sticky;
+  bottom: 0;
+  background-color: #fff;
+
+  .paging-bar-title {
+    font-weight: 500;
+  }
+
+  .paging-info {
+    margin: 0px 5px;
+  }
+
+  .paging-btn {
+    border: 1px solid #e4e9f2;
+    height: 20px;
+    padding: 0px 8px 0px 8px;
+
+    &:hover:enabled {
+      background-color: darken(#e4e9f2, 5%);
+    }
+  }
+}
+
+/* End of Paging Styles */
