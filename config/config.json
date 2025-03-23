@@ -22,7 +22,7 @@
   ],
   "defaultColor": "light-blue",
   "logging": {
-    "level": "trace"
+    "level": "info"
   },
   "request": {
     "cert": "",
@@ -91,7 +91,7 @@
     {
       "key": "enableUpdatingStatus",
       "name": "Enable Updating Issue Status",
-      "description": "If enabled, users will be able to update the issue status of an issue.",
+      "description": "If enabled, users will be able to update the issue status of an issue.  Users will only be able to update status if they have the appropriate permissions in Jira based on the configured Jira Email Address and/or API Token.",
       "default": false,
       "type": "boolean",
       "userCanEdit": false,
@@ -100,7 +100,7 @@
     {
       "key": "enableAddingComments",
       "name": "Enable Adding Comments",
-      "description": "If enabled, users will be able to add comments to issues. ",
+      "description": "If enabled, users will be able to add comments to issues. Users will only be able to add comments if they have the appropriate permissions in Jira based on the configured Jira Email Address and/or API Token.",
       "default": false,
       "type": "boolean",
       "userCanEdit": false,
@@ -109,7 +109,7 @@
     {
       "key": "enableCreatingIssues",
       "name": "Enable Creating Issues",
-      "description": "Select the search criteria to use when searching scoutPRIME.  Only indicators that meet the selected criteria will be returned.  Defaults to \"All\".",
+      "description": "If enabled, users will be able to create new Jira issues.  Users will only be able to create issues if they have the appropriate permissions in Jira based on the configured Jira Email Address and/or API Token.",
       "default": {
         "value": "disabled",
         "display": "Disabled -- Users cannot create issues"
@@ -122,11 +122,11 @@
         },
         {
           "value": "enabledSearchOnly",
-          "display": "Enabled -- Create issues when Jira search results exist"
+          "display": "Enabled -- Creating Jira issues is available when Jira search results exist"
         },
         {
           "value": "enabledAlways",
-          "display": "Enabled - Create Jira issues always available"
+          "display": "Enabled - Creating Jira issues is always available"
         }
       ],
       "multiple": false,

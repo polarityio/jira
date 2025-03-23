@@ -240,7 +240,7 @@
       {{#if (gt filteredPagingData.length pageSize)}}
         Viewing search results {{pagingStartItem}} - {{pagingEndItem}} of {{filteredPagingData.length}}
       {{else}}
-        Viewing {{filteredPagingData.length}} search results
+        Viewing {{filteredPagingData.length}} search result{{#if (gt filteredPagingData.length 1)}}s{{/if}}
       {{/if}}
     </div>
     {{#if details.jql}}
@@ -438,8 +438,8 @@
         <li class="nav-item">
           <a
             {{action (mut issue.__state.activeTab) "description"}}
-                  class="nav-link {{if (or (eq issue.__state.activeTab "description")(not issue.__state.activeTab)) "active"}}"
-                  href="#"
+            class="nav-link {{if (or (eq issue.__state.activeTab "description")(not issue.__state.activeTab)) "active"}}"
+            href="#"
           >
             Description
           </a>
@@ -448,15 +448,15 @@
       <li class="nav-item">
         <a 
           {{action (mut issue.__state.activeTab) "comments"}}
-          class="nav-link {{if (eq issue.__state.activeTab "comments") "active"}}"
+          class="nav-link {{if (eq issue.__state.activeTab "comments") "active"}} {{if state.isDetailsLoading "disabled"}}"
           href="#"
         >
           Comments
           {{#if state.isDetailsLoading}}
             {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
           {{else}}
-            ({{issue.comments.length}})  
-          {{/if}}        
+            ({{issue.comments.length}})
+          {{/if}}
         </a>
       </li>    
     </ul>
