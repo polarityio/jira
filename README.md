@@ -4,7 +4,9 @@ The Polarity Jira integration allows Polarity to search Jira to return any Issue
 
 The integration supports Jira Cloud as well as Jira Server v8.16+
 
-<img width="400" alt="Jira Issue Lookup Screenshot" src="./assets/overlay.png">
+| ![](./assets/overlay.png)                  | ![](./assets/add_comment.png) |![](./assets/create_issue.png) |
+|--------------------------------------------|-------------------------------|-------------------------------|
+| *Lookup and Search Issues* | *Add Comments*        | *Create Issues*
 
 ## Authentication
 
@@ -35,6 +37,21 @@ A comma delimited list regular expressions for ignoring entities from search
 ### Projects to Search
 
 A comma delimited list of project names to search. Project short names can be used in addition to the long names. Project names are not case-sensitive. If no value is provided, all accessible projects will be searched. This setting does not affect searches on Jira Issue Keys and is only used for searches on other entities (e.g., IP, domain, cve, etc.).
+
+### Enable Updating Issue Status
+If enabled, users will be able to update the issue status of an issue. Users will only be able to update status if they have the appropriate permissions in Jira based on the configured Jira Email Address and/or API Token.
+
+### Enable Adding Comments
+If enabled, users will be able to add comments to issues. Users will only be able to add comments if they have the appropriate permissions in Jira based on the configured Jira Email Address and/or API Token.
+
+### Enable Creating Issues
+If enabled, users will be able to create new Jira issues. Users will only be able to create issues if they have the appropriate permissions in Jira based on the configured Jira Email Address and/or API Token.
+
+Valid options are:
+
+1. Disabled -- Users cannot create issues
+2. Enabled -- Creating Jira issues is available when Jira search results exist
+3. Enabled - Creating Jira issues is always available
 
 ## Installation Instructions
 
