@@ -448,7 +448,7 @@
       <li class="nav-item">
         <a 
           {{action (mut issue.__state.activeTab) "comments"}}
-          class="nav-link {{if (eq issue.__state.activeTab "comments") "active"}} {{if state.isDetailsLoading "disabled"}}"
+          class="nav-link {{if (or (eq issue.__state.activeTab "comments")(not issue.renderedFields.description)) "active"}} {{if state.isDetailsLoading "disabled"}}"
           href="#"
         >
           Comments
@@ -469,7 +469,7 @@
     {{/if}}
   
     {{!-- Comments Tab --}}
-    {{#if (eq issue.__state.activeTab "comments")}}
+    {{#if (or (eq issue.__state.activeTab "comments")(not issue.renderedFields.description))}}
       <div class="mt-1">
         {{#if (eq issue.comments.length 0)}}
           No Comments
