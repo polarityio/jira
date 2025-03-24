@@ -94,6 +94,10 @@ async function addIntegrationDataToIssue(issueId, comment, entity, username, use
 }
 
 function getIntegrationSummaryTags(integration) {
+  if (Array.isArray(integration.data.summary) && integration.data.summary.length === 0) {
+    integration.data.summary.push('No summary tags available');
+  }
+
   return {
     type: 'paragraph',
     content: [
