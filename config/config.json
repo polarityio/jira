@@ -6,7 +6,7 @@
   "customTypes": [
     {
       "key": "jira",
-      "regex": "[A-Z]{1,10}-\\d{1,10}"
+      "regex": "(?:^|\\s)[A-Z]{1,10}-\\d{1,10}(?=$|\\s)"
     }
   ],
   "entityTypes": [
@@ -19,6 +19,26 @@
     "SHA1",
     "SHA256",
     "cve"
+  ],
+  "dataTypes": [
+    "domain",
+    "email",
+    "IPv4",
+    "IPv6",
+    "url",
+    "MD5",
+    "SHA1",
+    "SHA256",
+    "cve",
+    {
+      "type": "custom",
+      "name": "Jira Issue Key",
+      "description": "Captures Jira Issue keys in the format of <PROJECT>-<NUMBER>",
+      "editable": true,
+      "enabled": true,
+      "key": "jira",
+      "regex": "(?:^|\\s)[A-Z]{1,10}-\\d{1,10}(?=$|\\s)"
+    }
   ],
   "defaultColor": "light-blue",
   "logging": {
