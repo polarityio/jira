@@ -57,7 +57,16 @@ async function addIntegrationDataToIssue(
     });
   }
 
-  const commentGroups = groupIntegrationDataToTarget(integrationDataAdf, MAX_CHARACTER_COUNT_PER_INTEGRATION);
+  let firstBinTarget = MAX_CHARACTER_COUNT_PER_INTEGRATION;
+  if (comment) {
+    firstBinTarget = MAX_CHARACTER_COUNT_PER_INTEGRATION - comment.length;
+  }
+
+  const commentGroups = groupIntegrationDataToTarget(
+    integrationDataAdf,
+    firstBinTarget,
+    MAX_CHARACTER_COUNT_PER_INTEGRATION
+  );
 
   const debugStructure = [];
   commentGroups.forEach((group) => {
@@ -66,13 +75,36 @@ async function addIntegrationDataToIssue(
 
   Logger.debug({ debugStructure }, 'Integration Data Grouping');
 
-  const addedComments = [];
+  const newlyCreatedComments = [];
+  // We need to reverse the commentGroups so that the first group which has extra space for a comment
+  // now comes at the end so that we can add our comment to it and have it appear first
+  // on the Jira comments page.  This is meant to support the default sort order in Jira which is 
+  // to display the most recent comment first (i.e., the first comment we had becomes the last comment so we
+  // need the last comment we add to be the first).
+  commentGroups.reverse();
   await async.eachOfLimit(commentGroups, 1, async (group, index) => {
     const content = [];
 
+    // If the user wanted to add some regular comment text, we add it to the first comment
+    // Remember comments appear in reverse order which is why we add it to the last comment in
+    // the array.
+    if (comment && index === commentGroups.length - 1) {
+      content.push({
+        content: [
+          {
+            text: comment,
+            type: 'text'
+          }
+        ],
+        type: 'paragraph'
+      });
+    }
+
     content.push(
       getPanel(
-        `(${commentGroups.length - index} of ${commentGroups.length}) Polarity Integration Data – the following information was added by ${username} (${userEmail}) via Polarity`
+        `(${commentGroups.length - index} of ${
+          commentGroups.length
+        }) Polarity Integration Data – the following information was added by ${username} (${userEmail}) via Polarity`
       )
     );
     content.push(getHeading1(defangEntity(entity)));
@@ -87,10 +119,10 @@ async function addIntegrationDataToIssue(
     };
 
     const addedComment = await addComment(issueId, commentInAtlassianDocumentFormat, options);
-    addedComments.unshift(addedComment);
+    newlyCreatedComments.unshift(addedComment);
   });
 
-  return addedComments;
+  return newlyCreatedComments;
 }
 
 async function addComment(issueId, atlassianDocumentFormatData, options) {
@@ -954,7 +986,7 @@ function jsonToDotNotationArray(obj) {
  * @param target
  * @returns {any[]}
  */
-function groupIntegrationDataToTarget(integrationData, target) {
+function groupIntegrationDataToTarget(integrationData, firstBinTarget, target) {
   // Sort descending
   integrationData.sort((a, b) => b.characterCount - a.characterCount);
 
@@ -967,8 +999,17 @@ function groupIntegrationDataToTarget(integrationData, target) {
     let placed = false;
 
     // Try to place `num` in the first bin where it fits
-    for (const bin of bins) {
-      if (bin.sum + count <= target) {
+    for (let i = 0; i < bins.length; i++) {
+      const bin = bins[i];
+      let tmpTarget = target;
+
+      // if this is the first bin, then use firstBinTarget because we need to leave
+      // room to add in our comment
+      if (i === 0) {
+        tmpTarget = firstBinTarget;
+      }
+
+      if (bin.sum + count <= tmpTarget) {
         bin.items.push(integration);
         bin.sum += count;
         placed = true;
