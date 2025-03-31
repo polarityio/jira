@@ -57,7 +57,7 @@ async function doLookup(entities, options, cb) {
     await async.each(entitiesWithoutIgnored, async (entityObj, next) => {
       let apiResponse;
       if (entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0) {
-        apiResponse = await getIssueById(entityObj.value, options);
+        apiResponse = await getIssueById(entityObj.value.trim(), options);
       } else {
         apiResponse = await searchIssues(entityObj, options);
       }
@@ -215,22 +215,24 @@ async function onMessage(payload, options, cb) {
             error: 'Adding comments is disabled for this integration'
           });
         }
-        let newComment;
+        let newComments;
         if (payload.includeIntegrationData) {
-          newComment = await addIntegrationDataToIssue(
+          newComments = await addIntegrationDataToIssue(
             payload.issueId,
             payload.comment,
             payload.entity,
             payload.username,
             payload.email,
             payload.integrationData,
+            payload.annotations,
             options
           );
         } else {
-          newComment = await addCommentToIssue(payload.issueId, payload.comment, options);
+          let newComment = await addCommentToIssue(payload.issueId, payload.comment, options);
+          newComments.push(newComment);
         }
         cb(null, {
-          comment: newComment
+          comments: newComments
         });
       } catch (e) {
         log.error(e, 'Error adding comment');
@@ -287,6 +289,7 @@ async function onMessage(payload, options, cb) {
             payload.username,
             payload.email,
             payload.integrationData,
+            payload.annotations,
             options
           );
         }

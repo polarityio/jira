@@ -81,7 +81,6 @@ polarity.export = PolarityComponent.extend({
       this.set('state.createIssue.loadingProjects', false);
       //this.set('state.createIssue.lastCreatedIssue', 'PC-28');
     }
-    console.info('JIRA Block Component Init', this.get('block'));
   },
   onDetailsLoaded() {
     if (this.get('details.issues')) {
@@ -157,13 +156,17 @@ polarity.export = PolarityComponent.extend({
 
       const includeIntegrationData = this.get(`pagedPagingData.${issueIndex}.__state.showIntegrationData`);
       let selectedIntegrations = [];
+      let annotations;
       if (this.get(`pagedPagingData.${issueIndex}.__state.integrations`)) {
         selectedIntegrations = this.get(`pagedPagingData.${issueIndex}.__state.integrations`).filter(
-          (integration) => integration.selected
+          (integration) => integration.selected && !integration.isAnnotations
+        );
+        annotations = this.get(`pagedPagingData.${issueIndex}.__state.integrations`).find(
+          (integration) => integration.selected && integration.isAnnotations
         );
       }
 
-      if (includeIntegrationData && selectedIntegrations.length === 0) {
+      if (includeIntegrationData && selectedIntegrations.length === 0 && !annotations) {
         this.set(`pagedPagingData.${issueIndex}.__state.missingIntegrations`, true);
         return;
       }
@@ -182,15 +185,16 @@ polarity.export = PolarityComponent.extend({
 
       if (payload.includeIntegrationData) {
         payload.integrationData = selectedIntegrations;
+        payload.annotations = annotations;
       }
 
       this.sendIntegrationMessage(payload)
         .then((result) => {
           this.flashMessage(`Successfully added comment`, 'success');
           const comments = this.get(`pagedPagingData.${issueIndex}.comments`);
-          comments.unshift(result.comment);
+          const newComments = [...result.comments, ...comments];
           // New array reference here triggers a template refresh
-          this.set(`pagedPagingData.${issueIndex}.comments`, [...comments]);
+          this.set(`pagedPagingData.${issueIndex}.comments`, newComments);
           this.setIssueState(issueIndex, 'commentText', '');
           this.setIssueState(issueIndex, 'showAddComment', false);
         })
@@ -291,11 +295,17 @@ polarity.export = PolarityComponent.extend({
       }
       const includeIntegrationData = this.get('state.createIssue.showIntegrationData');
       let selectedIntegrations = [];
+      let annotations;
       if (this.get('state.createIssue.integrations')) {
-        selectedIntegrations = this.get('state.createIssue.integrations').filter((integration) => integration.selected);
+        selectedIntegrations = this.get('state.createIssue.integrations').filter(
+          (integration) => integration.selected && !integration.isAnnotations
+        );
+        annotations = this.get('state.createIssue.integrations').find(
+          (integration) => integration.selected && integration.isAnnotations
+        );
       }
 
-      if (includeIntegrationData && selectedIntegrations.length === 0) {
+      if (includeIntegrationData && selectedIntegrations.length === 0 && !annotations) {
         this.set('state.createIssue.missingIntegrations', true);
         return;
       }
@@ -314,6 +324,7 @@ polarity.export = PolarityComponent.extend({
 
       if (payload.includeIntegrationData) {
         payload.integrationData = selectedIntegrations;
+        payload.annotations = annotations;
       }
 
       this.sendIntegrationMessage(payload)
@@ -353,7 +364,6 @@ polarity.export = PolarityComponent.extend({
       }
     },
     refreshIntegrations: function (issueIndex) {
-      console.info('refreshing integrations', issueIndex);
       if (issueIndex !== undefined) {
         this.setIssueState(issueIndex, 'spinRefresh', true);
       } else {
@@ -475,7 +485,8 @@ polarity.export = PolarityComponent.extend({
       integrationData.unshift({
         integrationName: 'Polarity Annotations',
         data: annotations,
-        selected: false
+        selected: false,
+        isAnnotations: true
       });
     }
     if (issueIndex !== undefined) {
@@ -500,7 +511,7 @@ polarity.export = PolarityComponent.extend({
         accum.push({
           integrationName: block.integrationName,
           data: block.data,
-          selected: true
+          selected: false
         });
       }
       return accum;
