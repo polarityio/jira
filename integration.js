@@ -57,7 +57,7 @@ async function doLookup(entities, options, cb) {
     await async.each(entitiesWithoutIgnored, async (entityObj, next) => {
       let apiResponse;
       if (entityObj.type === 'custom' && entityObj.types.indexOf('custom.jira') >= 0) {
-        apiResponse = await getIssueById(entityObj.value, options);
+        apiResponse = await getIssueById(entityObj.value.trim(), options);
       } else {
         apiResponse = await searchIssues(entityObj, options);
       }

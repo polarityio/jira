@@ -48,12 +48,14 @@ async function addIntegrationDataToIssue(
       };
     })
     .flat();
-  
-  integrationDataAdf.push({
-    characterCount: JSON.stringify(annotations).length,
-    adf: getAnnotations(annotations),
-    integrationName: 'Polarity Annotations'
-  })
+
+  if (annotations) {
+    integrationDataAdf.push({
+      characterCount: JSON.stringify(annotations).length,
+      adf: getAnnotations(annotations),
+      integrationName: 'Polarity Annotations'
+    });
+  }
 
   const commentGroups = groupIntegrationDataToTarget(integrationDataAdf, MAX_CHARACTER_COUNT_PER_INTEGRATION);
 
@@ -66,13 +68,14 @@ async function addIntegrationDataToIssue(
 
   const addedComments = [];
   await async.eachOfLimit(commentGroups, 1, async (group, index) => {
-    const content = [
-      getPanel(
-        `Polarity Integration Data – the following information was added by ${username} (${userEmail}) via Polarity`
-      ),
-      getHeading1(defangEntity(entity))
-    ];
+    const content = [];
 
+    content.push(
+      getPanel(
+        `(${commentGroups.length - index} of ${commentGroups.length}) Polarity Integration Data – the following information was added by ${username} (${userEmail}) via Polarity`
+      )
+    );
+    content.push(getHeading1(defangEntity(entity)));
     content.push(...group.map((integration) => integration.adf).flat());
 
     const commentInAtlassianDocumentFormat = {
@@ -86,26 +89,6 @@ async function addIntegrationDataToIssue(
     const addedComment = await addComment(issueId, commentInAtlassianDocumentFormat, options);
     addedComments.unshift(addedComment);
   });
-
-  // const commentInAtlassianDocumentFormat = {
-  //   body: {
-  //     content: [
-  //       getPanel(
-  //         `Polarity Integration Data – the following information was added by ${username} (${userEmail}) via Polarity`
-  //       ),
-  //       getHeading1(defangEntity(entity)),
-  //       ...getAnnotations(annotations),
-  //       // For each integration, add in the integration name as a heading, followed by the summary tags, followed
-  //       // by the expandable block with the integration data.  Finally, add a divider between each integration
-  //       // except the last one (no trailing divider).
-  //       ...integrationDataAdf.map((integration) => integration.adf).flat()
-  //     ],
-  //     type: 'doc',
-  //     version: 1
-  //   }
-  // };
-
-  //return await addComment(issueId, commentInAtlassianDocumentFormat, options);
 
   return addedComments;
 }
@@ -855,12 +838,20 @@ function stringIsBase64Image(value) {
   return /^data:image\/[a-zA-Z]*;base64,/.test(value);
 }
 
+function stringIsHexColor(value) {
+  return /^#(?:[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(value);
+}
+
 function isValueToIgnore(value) {
   if (isEmptyValue(value)) {
     return true;
   }
 
   if (typeof value === 'string' && stringIsBase64Image(value.trim())) {
+    return true;
+  }
+
+  if (typeof value === 'string' && stringIsHexColor(value.trim())) {
     return true;
   }
 
@@ -871,8 +862,11 @@ function isValueToIgnore(value) {
  * Convert a JSON object into an array of {key, value} pairs,
  * where 'key' is the dot notation path, and 'value' is the value at that path.
  *
+ * This method also tracks the total number of characters being used for the key:value
+ * pairs and returns it along with the array of JSON data.
+ *
  * @param {Object} obj - The JSON object to flatten.
- * @return {{result: *[], characterCount: *}} An array of { key, value } pairs.
+ * @return {{result: *[], characterCount: *, isTruncated: boolean}} An array of { key, value } pairs.
  */
 function jsonToDotNotationArray(obj) {
   const result = [];
@@ -894,10 +888,12 @@ function jsonToDotNotationArray(obj) {
       // If current is a primitive array we just take the array values and concat them together
       // after ignoring values
       let value = current.filter((value) => !isValueToIgnore(value)).join(', ');
-      characterCount += value.length + path.length;
+      const tmpCharacterCount = characterCount + value.length + path.length;
       if (characterCount > MAX_CHARACTER_COUNT_PER_INTEGRATION) {
         isTruncated = true;
         return;
+      } else {
+        characterCount = tmpCharacterCount;
       }
       result.push({ key: path, value, isPrimitiveArray: true });
     } else if (current && isFlatObject(current)) {
@@ -909,27 +905,38 @@ function jsonToDotNotationArray(obj) {
           return obj;
         }, {});
       const numCharacters = getFlatObjectCharacterCount(currentMinusIgnored);
+      const tmpCharacterCount = characterCount + numCharacters + path.length;
 
-      characterCount += numCharacters + path.length;
       if (characterCount > MAX_CHARACTER_COUNT_PER_INTEGRATION) {
         isTruncated = true;
         return;
+      } else {
+        characterCount = tmpCharacterCount;
       }
       result.push({ key: path, value: currentMinusIgnored, isFlatObject: true });
     } else if (current && typeof current === 'object') {
       // If current is an object or array, keep traversing its properties.
       for (const key in current) {
         if (Object.prototype.hasOwnProperty.call(current, key)) {
-          const newPath = path ? `${path}.${key}` : key;
+          let newPath = path;
+          // Only add the key if it's not an array or if it's an array with more than one element
+          if (!Array.isArray(current) || (Array.isArray(current) && current.length > 1)) {
+            newPath = path ? `${path}.${key}` : key;
+          }
           traverse(current[key], newPath);
         }
       }
     } else {
       // current is a primitive value (string, number, boolean, or null)
-      characterCount += String(current).length + path.length;
-      if (characterCount > MAX_CHARACTER_COUNT_PER_INTEGRATION) {
+      const tmpCharacterCount = characterCount + String(current).length + path.length;
+
+      // If the current data puts us over the max character count, skip it and mark this integration
+      // as having truncated data
+      if (tmpCharacterCount > MAX_CHARACTER_COUNT_PER_INTEGRATION) {
         isTruncated = true;
         return;
+      } else {
+        characterCount = tmpCharacterCount;
       }
       result.push({ key: path, value: String(current) });
     }
