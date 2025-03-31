@@ -12,6 +12,10 @@ The integration supports Jira Cloud as well as Jira Server v8.16+
 
 If you are authenticating to Jira Server v8.16+ then you should only provide an API Token.  For user's authenticating to Jira Cloud, a username and corresponding API token for that user are required.
 
+## Adding Integration Data to Issues
+
+This integration supports adding integration data to existing and newly created Jira issues.  The integration data is added as a comment.  Due to limits on the size of a Jira comment, integration data may be truncated and/or split across multiple comments.  
+
 ## Jira Integration Options
 
 ### Jira Base URL
