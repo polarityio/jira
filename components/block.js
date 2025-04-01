@@ -143,6 +143,8 @@ polarity.export = PolarityComponent.extend({
         .catch((err) => {
           console.error(err);
           this.flashMessage(`Failed to update status`, 'error');
+          this.setIssueState(issueIndex, 'errorMessage', JSON.stringify(err, null, 2));
+          this.setIssueState(issueIndex, 'errorTitle', 'Failed to update status');
         })
         .finally(() => {
           this.setIssueState(issueIndex, 'updating', false);
@@ -201,6 +203,8 @@ polarity.export = PolarityComponent.extend({
         .catch((err) => {
           console.error(err);
           this.flashMessage(`Failed to add comment`, 'danger');
+          this.setIssueState(issueIndex, 'errorMessage', JSON.stringify(err, null, 2));
+          this.setIssueState(issueIndex, 'errorTitle', 'Failed to add comment');
         })
         .finally(() => {
           this.setIssueState(issueIndex, 'updating', false);
