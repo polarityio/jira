@@ -1,6 +1,6 @@
 {
   "name": "Jira",
-  "version": "3.7.2",
+  "version": "3.7.3",
   "main": "./integration.js",
   "description": "Jira Issue Search",
   "private": true,

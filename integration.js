@@ -215,7 +215,7 @@ async function onMessage(payload, options, cb) {
             error: 'Adding comments is disabled for this integration'
           });
         }
-        let newComments;
+        let newComments = [];
         if (payload.includeIntegrationData) {
           newComments = await addIntegrationDataToIssue(
             payload.issueId,
