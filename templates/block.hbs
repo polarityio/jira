@@ -258,8 +258,6 @@
 {{/if}}
 {{!-- End of Paging Header --}}
 
-
-
 {{#each pagedPagingData as |issue issueIndex|}}
   <div class="issue-container">
     <div class="d-flex align-items-center justify-content-between">
@@ -287,6 +285,26 @@
         {{fa-icon icon="spinner-third" spin=true fixedWidth=true}}
       {{/if}}
     </div>
+
+    {{#if issue.__state.errorMessage}}
+      <div class="alert alert-danger error-message mt-2">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="error-message-title">
+            {{#if issue.__state.errorTitle}}
+              {{issue.__state.errorTitle}}
+            {{else}}
+              Unexpected Error Occurred
+            {{/if}}
+          </div>
+          <div>
+            {{fa-icon icon="times" fixedWidth=true click=(pipe-action (set issue "__state.errorMessage" "")(set issue "__state.errorTitle" "")) class="close-icon"}}
+          </div>
+        </div>
+        <div class="error-scrolling-container">
+          <pre>{{issue.__state.errorMessage}}</pre>
+        </div>
+      </div>
+    {{/if}}
   
     {{#if issue.fields.summary}}
       <h1 class="p-title">
