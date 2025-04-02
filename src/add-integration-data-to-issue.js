@@ -504,6 +504,28 @@ function getAnnotationsTableHeader() {
   };
 }
 
+function removeImageFromString(value){
+    return value.replace(/<svg.+<\/svg>/g, '').replace(/<img.+<\/img>/g, '');
+}
+
+/**
+ * Attempts to extract the text from a tag as some tags are objects
+ * @param tag
+ */
+function getTagText(tag){
+  if(typeof tag === 'string'){
+    
+    return removeImageFromString(tag).trim();
+  }
+  
+  if(tag && typeof tag === 'object' && typeof tag.text === 'string') {
+    return removeImageFromString(tag.text).trim();
+  }
+
+  // Fallback if tag is not a string or object with text property
+  return 'Tag unavailable';
+}
+
 function getTags(tags) {
   if (Array.isArray(tags) && tags.length === 0) {
     tags.push('No summary tags available');
@@ -517,7 +539,7 @@ function getTags(tags) {
           return [
             {
               type: 'text',
-              text: tag,
+              text: getTagText(tag),
               marks: [
                 {
                   type: 'code'
