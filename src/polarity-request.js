@@ -1,24 +1,11 @@
-const fs = require('fs');
 const { version: packageVersion } = require('../package.json');
 const request = require('postman-request');
 const { getLogger } = require('./logger');
 const { NetworkError } = require('./errors');
 
-const USER_AGENT = `isc-polarity-integration-v${packageVersion}`;
-
-const {
-  request: { ca, cert, key, passphrase, rejectUnauthorized, proxy }
-} = require('../config/config.js');
-
-const _configFieldIsValid = (field) => typeof field === 'string' && field.length > 0;
+const USER_AGENT = `polarity-jira-integration-v${packageVersion}`;
 
 const defaults = {
-  ...(_configFieldIsValid(ca) && { ca: fs.readFileSync(ca) }),
-  ...(_configFieldIsValid(cert) && { cert: fs.readFileSync(cert) }),
-  ...(_configFieldIsValid(key) && { key: fs.readFileSync }),
-  ...(_configFieldIsValid(passphrase) && { passphrase }),
-  ...(_configFieldIsValid(proxy) && { proxy }),
-  ...(typeof rejectUnauthorized === 'boolean' && { rejectUnauthorized }),
   json: true,
   headers: {
     'User-Agent': USER_AGENT
