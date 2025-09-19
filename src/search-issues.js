@@ -25,7 +25,7 @@ async function searchIssues(entity, options) {
 
   const requestOptions = {
     resultId: entity,
-    uri: `${options.baseUrl}/rest/api/3/search`,
+    uri: `${options.baseUrl}/rest/api/3/search/jql`,
     qs: {
       jql: jqlQuery,
       expand: 'renderedFields,transitions',
