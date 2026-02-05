@@ -1,0 +1,46 @@
+{
+  "root": {
+    "path": "",
+    "on_null": "return_empty"
+  },
+  "pipeline": [
+    {
+      "op": "copy",
+      "from": "issues[].key",
+      "to": "reduced_results.issue_keys"
+    },
+    {
+      "op": "copy",
+      "from": "issues[].renderedFields",
+      "to": "reduced_results.rendered_fields"
+    },
+    {
+      "op": "copy",
+      "from": "issues[].comments[].created",
+      "to": "reduced_results.comment_created_dates"
+    },
+    {
+      "op": "copy",
+      "from": "issues[].comments[].updated",
+      "to": "reduced_results.comment_updated_dates"
+    },
+    {
+      "op": "copy",
+      "from": "issues[].comments[].author.displayName",
+      "to": "reduced_results.comment_authors"
+    },
+    {
+      "op": "copy",
+      "from": "issues[].comments[].renderedBody",
+      "to": "reduced_results.comment_bodies"
+    },
+    {
+      "op": "prune",
+      "strategy": "empty_values",
+      "target": "reduced_results"
+    }
+  ],
+  "output": {
+    "result": "$working.reduced_results"
+  }
+}

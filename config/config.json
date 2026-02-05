@@ -54,6 +54,11 @@
   "styles": [
     "./styles/styles.less"
   ],
+  "reducer": {
+    "details": {
+      "file": "./reducers/details.json"
+    }
+  },
   "block": {
     "component": {
       "file": "./components/block.js"
